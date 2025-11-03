@@ -97,36 +97,145 @@ public:
     }
 };
 
+class CursaInternationala {
+public:
+    char* taraOrigine;
+    string taraDestinatie;
+    double distantaKm;
+    double durataTimpOre;
+    int nrColete;
+    char* soferId;
+    char* dataPlecarii;
+    bool esteFinalizata;
+    string COD_CURSA;
+
+    static double taxaVamalaFixa;
+    static int numarTotalCurse;
+    static int curseFinalizate;
+
+    // Functie statica: calculeaza cost total cursa
+    static double calculeazaCostTotalCursa(double distanta, int nrColete, bool urgenta = false) {
+        double costPerKm = (distanta > 2000) ? 0.45 : 0.50;
+        double costTransport = distanta * costPerKm;
+        double costColete = nrColete * 12.0;
+        double taxaUrgenta = urgenta ? 150.0 : 0.0;
+        return costTransport + costColete + taxaVamalaFixa + taxaUrgenta;
+    }
+
+    // Setteri si getteri pentru membri statici
+    static void setTaxaVamala(double taxa) {
+        if (taxa >= 0) taxaVamalaFixa = taxa;
+    }
+
+    static double getTaxaVamala() { return taxaVamalaFixa; }
+    static int getNumarTotalCurse() { return numarTotalCurse; }
+    static int getCurseFinalizate() { return curseFinalizate; }
+
+    // Metoda de initializare
+    void initializeaza() {
+        taraOrigine = new char[200];
+        soferId = new char[200];
+        dataPlecarii = new char[200];
+        numarTotalCurse++;
+        COD_CURSA = "CURS-" + to_string(numarTotalCurse);
+        esteFinalizata = false;
+    }
+
+    // Metoda de citire de la tastatura
+    void citeste() {
+        cout << "\n--- Introduceti datele cursei ---" << endl;
+
+        cout << "Tara origine: ";
+        cin.getline(taraOrigine, 200);
+
+        cout << "Tara destinatie: ";
+        getline(cin, taraDestinatie);
+
+        cout << "Distanta (km): ";
+        cin >> distantaKm;
+
+        cout << "Durata (ore): ";
+        cin >> durataTimpOre;
+
+        cout << "Numar colete: ";
+        cin >> nrColete;
+
+        cin.ignore();
+
+        cout << "ID sofer: ";
+        cin.getline(soferId, 200);
+
+        cout << "Data plecarii (DD/MM/YYYY): ";
+        cin.getline(dataPlecarii, 200);
+    }
+
+    // Metoda de afisare
+    void afiseaza() const {
+        cout << "\n========================================" << endl;
+        cout << "CURSA INTERNATIONALA" << endl;
+        cout << "========================================" << endl;
+        cout << "Cod: " << COD_CURSA << endl;
+        cout << "Ruta: " << taraOrigine << " -> " << taraDestinatie << endl;
+        cout << "Distanta: " << distantaKm << " km" << endl;
+        cout << "Durata: " << durataTimpOre << " ore" << endl;
+        cout << "Colete: " << nrColete << endl;
+        cout << "Sofer: " << soferId << endl;
+        cout << "Data: " << dataPlecarii << endl;
+        cout << "Status: " << (esteFinalizata ? "FINALIZATA" : "IN CURS") << endl;
+        cout << "========================================" << endl;
+    }
+
+    // Metoda pentru eliberare memorie
+    void elibereaza() {
+        delete[] taraOrigine;
+        delete[] soferId;
+        delete[] dataPlecarii;
+    }
+};
+
 // Initializare membri statici
 double ClientCorporativ::discountCorporativ = 0.15;
 int ClientCorporativ::numarTotalClienti = 0;
 int ClientCorporativ::clientiActivi = 0;
+double CursaInternationala::taxaVamalaFixa = 75.0;
+int CursaInternationala::numarTotalCurse = 0;
+int CursaInternationala::curseFinalizate = 0;
 
 //
 // FUNCTIA MAIN - TESTARE MANUALA
 //
 int main() {
     cout << "========================================" << endl;
-    cout << "  TEST CLASA ClientCorporativ - FAZA 1" << endl;
-    cout << "  TESTARE MANUALA DE LA TASTATURA" << endl;
+    cout << "  SISTEM MANAGEMENT TRANSPORT" << endl;
+    cout << "  TESTARE CLIENTI SI CURSE" << endl;
     cout << "========================================\n" << endl;
 
     int optiune;
     vector<ClientCorporativ*> clienti;
+    vector<CursaInternationala*> curse;
 
     do {
-        cout << "\n========== MENIU ===========" << endl;
+        cout << "\n========== MENIU PRINCIPAL ===========" << endl;
+        cout << "--- CLIENTI CORPORATIVI ---" << endl;
         cout << "1. Creare client nou" << endl;
         cout << "2. Afisare toti clientii" << endl;
         cout << "3. Calcul pret cu discount (functie statica)" << endl;
         cout << "4. Modificare discount corporativ" << endl;
-        cout << "5. Afisare statistici (membri statici)" << endl;
-        cout << "0. Iesire" << endl;
+        cout << "5. Afisare statistici clienti" << endl;
+        cout << "\n--- CURSE INTERNATIONALE ---" << endl;
+        cout << "6. Creare cursa noua" << endl;
+        cout << "7. Afisare toate cursele" << endl;
+        cout << "8. Calcul cost total cursa (functie statica)" << endl;
+        cout << "9. Modificare taxa vamala" << endl;
+        cout << "10. Finalizare cursa" << endl;
+        cout << "11. Afisare statistici curse" << endl;
+        cout << "\n0. Iesire" << endl;
         cout << "Optiune: ";
         cin >> optiune;
         cin.ignore();
 
         switch (optiune) {
+            // ========== CLIENTI CORPORATIVI ==========
         case 1: {
             cout << "\n=== CREARE CLIENT NOU ===" << endl;
             ClientCorporativ* clientNou = new ClientCorporativ();
@@ -183,7 +292,7 @@ int main() {
         }
 
         case 5:
-            cout << "\n=== STATISTICI GLOBALE ===" << endl;
+            cout << "\n=== STATISTICI CLIENTI ===" << endl;
             cout << "========================================" << endl;
             cout << "Total clienti creati: " << ClientCorporativ::getNumarTotalClienti() << endl;
             cout << "Clienti activi: " << ClientCorporativ::getClientiActivi() << endl;
@@ -191,14 +300,126 @@ int main() {
             cout << "========================================" << endl;
             break;
 
+            // ========== CURSE INTERNATIONALE ==========
+        case 6: {
+            cout << "\n=== CREARE CURSA NOUA ===" << endl;
+            CursaInternationala* cursaNoua = new CursaInternationala();
+            cursaNoua->initializeaza();
+            cursaNoua->citeste();
+            curse.push_back(cursaNoua);
+            cout << "\nCursa creata cu succes! (Cod: " << cursaNoua->COD_CURSA << ")" << endl;
+            break;
+        }
+
+        case 7:
+            cout << "\n=== AFISARE TOATE CURSELE ===" << endl;
+            if (curse.empty()) {
+                cout << "Nu exista curse create!" << endl;
+            }
+            else {
+                cout << "Total curse: " << curse.size() << endl;
+                for (size_t i = 0; i < curse.size(); i++) {
+                    cout << "\n--- CURSA " << (i + 1) << " ---";
+                    curse[i]->afiseaza();
+                }
+            }
+            break;
+
+        case 8: {
+            cout << "\n=== CALCUL COST TOTAL CURSA ===" << endl;
+            double distanta;
+            int nrColete;
+            char urgenta;
+
+            cout << "Introduceti distanta (km): ";
+            cin >> distanta;
+            cout << "Introduceti numarul de colete: ";
+            cin >> nrColete;
+            cout << "Este urgenta? (d/n): ";
+            cin >> urgenta;
+
+            bool esteUrgenta = (urgenta == 'd' || urgenta == 'D');
+            double costTotal = CursaInternationala::calculeazaCostTotalCursa(distanta, nrColete, esteUrgenta);
+
+            cout << "\n--- DETALII COST ---" << endl;
+            cout << "Distanta: " << distanta << " km" << endl;
+            cout << "Colete: " << nrColete << endl;
+            cout << "Taxa vamala: " << CursaInternationala::getTaxaVamala() << " EUR" << endl;
+            cout << "Urgenta: " << (esteUrgenta ? "DA (+150 EUR)" : "NU") << endl;
+            cout << "COST TOTAL: " << costTotal << " EUR" << endl;
+            break;
+        }
+
+        case 9: {
+            cout << "\n=== MODIFICARE TAXA VAMALA ===" << endl;
+            cout << "Taxa vamala curenta: " << CursaInternationala::getTaxaVamala() << " EUR" << endl;
+            double taxaNoua;
+            cout << "Introduceti noua taxa vamala (EUR): ";
+            cin >> taxaNoua;
+            CursaInternationala::setTaxaVamala(taxaNoua);
+            cout << "Taxa vamala actualizata: " << CursaInternationala::getTaxaVamala() << " EUR" << endl;
+            break;
+        }
+
+        case 10: {
+            cout << "\n=== FINALIZARE CURSA ===" << endl;
+            if (curse.empty()) {
+                cout << "Nu exista curse create!" << endl;
+            }
+            else {
+                cout << "Curse disponibile:" << endl;
+                for (size_t i = 0; i < curse.size(); i++) {
+                    cout << (i + 1) << ". " << curse[i]->COD_CURSA
+                        << " (" << curse[i]->taraOrigine << " -> " << curse[i]->taraDestinatie << ")"
+                        << " - Status: " << (curse[i]->esteFinalizata ? "FINALIZATA" : "IN CURS") << endl;
+                }
+
+                int indexCursa;
+                cout << "Selectati numarul cursei de finalizat: ";
+                cin >> indexCursa;
+
+                if (indexCursa >= 1 && indexCursa <= (int)curse.size()) {
+                    if (curse[indexCursa - 1]->esteFinalizata) {
+                        cout << "Cursa este deja finalizata!" << endl;
+                    }
+                    else {
+                        curse[indexCursa - 1]->esteFinalizata = true;
+                        CursaInternationala::curseFinalizate++;
+                        cout << "Cursa " << curse[indexCursa - 1]->COD_CURSA << " a fost finalizata!" << endl;
+                    }
+                }
+                else {
+                    cout << "Numar invalid!" << endl;
+                }
+            }
+            break;
+        }
+
+        case 11:
+            cout << "\n=== STATISTICI CURSE ===" << endl;
+            cout << "========================================" << endl;
+            cout << "Total curse create: " << CursaInternationala::getNumarTotalCurse() << endl;
+            cout << "Curse finalizate: " << CursaInternationala::getCurseFinalizate() << endl;
+            cout << "Curse in curs: " << (CursaInternationala::getNumarTotalCurse() - CursaInternationala::getCurseFinalizate()) << endl;
+            cout << "Taxa vamala: " << CursaInternationala::getTaxaVamala() << " EUR" << endl;
+            cout << "========================================" << endl;
+            break;
+
         case 0:
             cout << "\nIesire din program..." << endl;
-            // Eliberare memorie
+            // Eliberare memorie clienti
             for (size_t i = 0; i < clienti.size(); i++) {
                 clienti[i]->elibereaza();
                 delete clienti[i];
             }
             clienti.clear();
+
+            // Eliberare memorie curse
+            for (size_t i = 0; i < curse.size(); i++) {
+                curse[i]->elibereaza();
+                delete curse[i];
+            }
+            curse.clear();
             break;
 
         default:
