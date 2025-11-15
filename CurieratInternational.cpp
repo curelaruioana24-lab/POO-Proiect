@@ -7,10 +7,10 @@
 using namespace std;
 
 //
-// CLASA 1: ClientCorporativ - COMPLET CU CONSTRUCTORI
+// CLASA 1: ClientCorporativ - FAZA 2 (atribute private + getteri/setteri)
 //
 class ClientCorporativ {
-public:
+private:
     char* numeCompanie;
     int nrAngajati;
     string codFiscal;
@@ -24,7 +24,8 @@ public:
     static int numarTotalClienti;
     static int clientiActivi;
 
-    // Constructor fără parametri
+public:
+    // Constructori
     ClientCorporativ()
         : numeCompanie(nullptr),
         adresaSediu(nullptr),
@@ -44,7 +45,6 @@ public:
         clientiActivi++;
     }
 
-    // Constructor cu toți parametrii
     ClientCorporativ(const char* nume, const char* adresa, const char* contact,
         int angajati, string cod, double volum, bool activ)
         : numeCompanie(nullptr),
@@ -71,7 +71,6 @@ public:
         if (activ) clientiActivi++;
     }
 
-    // Constructor de copiere
     ClientCorporativ(const ClientCorporativ& c)
         : numeCompanie(nullptr),
         adresaSediu(nullptr),
@@ -95,27 +94,28 @@ public:
         strcpy(persoanaContact, c.persoanaContact);
     }
 
-    // Destructor
     ~ClientCorporativ() {
         delete[] numeCompanie;
         delete[] adresaSediu;
         delete[] persoanaContact;
     }
 
-    // Operator =
     ClientCorporativ& operator=(const ClientCorporativ& c) {
         if (this != &c) {
             delete[] numeCompanie;
             delete[] adresaSediu;
             delete[] persoanaContact;
 
-            numeCompanie = new char[strlen(c.numeCompanie) + 1];
+            size_t len = strlen(c.numeCompanie);
+            numeCompanie = new char[len + 1];
             strcpy(numeCompanie, c.numeCompanie);
 
-            adresaSediu = new char[strlen(c.adresaSediu) + 1];
+            len = strlen(c.adresaSediu);
+            adresaSediu = new char[len + 1];
             strcpy(adresaSediu, c.adresaSediu);
 
-            persoanaContact = new char[strlen(c.persoanaContact) + 1];
+            len = strlen(c.persoanaContact);
+            persoanaContact = new char[len + 1];
             strcpy(persoanaContact, c.persoanaContact);
 
             nrAngajati = c.nrAngajati;
@@ -127,7 +127,61 @@ public:
         return *this;
     }
 
-    // Functie statica
+    // GETTERI
+    const char* getNumeCompanie() const { return numeCompanie; }
+    int getNrAngajati() const { return nrAngajati; }
+    string getCodFiscal() const { return codFiscal; }
+    double getVolumTransporturiLunar() const { return volumTransporturiLunar; }
+    const char* getAdresaSediu() const { return adresaSediu; }
+    const char* getPersoanaContact() const { return persoanaContact; }
+    bool getEsteActiv() const { return esteActiv; }
+    int getID() const { return ID_CLIENT; }
+
+    // SETTERI
+    void setNumeCompanie(const char* nume) {
+        if (nume != nullptr) {
+            delete[] numeCompanie;
+            size_t len = strlen(nume);
+            numeCompanie = new char[len + 1];
+            strcpy(numeCompanie, nume);
+        }
+    }
+
+    void setNrAngajati(int nr) {
+        if (nr >= 0) nrAngajati = nr;
+    }
+
+    void setCodFiscal(string cod) {
+        codFiscal = cod;
+    }
+
+    void setVolumTransporturiLunar(double volum) {
+        if (volum >= 0) volumTransporturiLunar = volum;
+    }
+
+    void setAdresaSediu(const char* adresa) {
+        if (adresa != nullptr) {
+            delete[] adresaSediu;
+            size_t len = strlen(adresa);
+            adresaSediu = new char[len + 1];
+            strcpy(adresaSediu, adresa);
+        }
+    }
+
+    void setPersoanaContact(const char* contact) {
+        if (contact != nullptr) {
+            delete[] persoanaContact;
+            size_t len = strlen(contact);
+            persoanaContact = new char[len + 1];
+            strcpy(persoanaContact, contact);
+        }
+    }
+
+    void setEsteActiv(bool activ) {
+        esteActiv = activ;
+    }
+
+    // Functii statice
     static double calculeazaPretFinal(double pretInitial, double volumLunar) {
         double discountTotal = discountCorporativ;
         if (volumLunar > 1000) discountTotal += 0.05;
@@ -146,11 +200,18 @@ public:
     void citeste() {
         cout << "\n--- Introduceti datele clientului ---" << endl;
         cout << "Nume companie: ";
-        cin.getline(numeCompanie, 200);
+        char buffer[200];
+        cin.getline(buffer, 200);
+        setNumeCompanie(buffer);
+
         cout << "Adresa sediu: ";
-        cin.getline(adresaSediu, 200);
+        cin.getline(buffer, 200);
+        setAdresaSediu(buffer);
+
         cout << "Persoana contact: ";
-        cin.getline(persoanaContact, 200);
+        cin.getline(buffer, 200);
+        setPersoanaContact(buffer);
+
         cout << "Numar angajati: ";
         cin >> nrAngajati;
         cout << "Cod fiscal (ex: RO12345678): ";
@@ -161,9 +222,9 @@ public:
     }
 
     void afiseaza() const {
-        cout << "\n========================================" << endl;
+        cout << "\n" << endl;
         cout << "CLIENT CORPORATIV #" << ID_CLIENT << endl;
-        cout << "========================================" << endl;
+        cout << "=" << endl;
         cout << "Companie: " << numeCompanie << endl;
         cout << "Adresa: " << adresaSediu << endl;
         cout << "Contact: " << persoanaContact << endl;
@@ -171,15 +232,19 @@ public:
         cout << "Cod Fiscal: " << codFiscal << endl;
         cout << "Volum/Luna: " << volumTransporturiLunar << " tone" << endl;
         cout << "Status: " << (esteActiv ? "ACTIV" : "INACTIV") << endl;
-        cout << "========================================" << endl;
+        cout << "=" << endl;
     }
+
+    // Declarare functii friend
+    friend void aplicaDiscountSpecial(ClientCorporativ& client, double discountExtra);
+    friend void afiseazaRaportClient(const ClientCorporativ& client);
 };
 
 //
-// CLASA 2: CursaInternationala - COMPLET CU CONSTRUCTORI
+// CLASA 2: CursaInternationala - FAZA 2
 //
 class CursaInternationala {
-public:
+private:
     char* taraOrigine;
     string taraDestinatie;
     double distantaKm;
@@ -194,7 +259,7 @@ public:
     static int numarTotalCurse;
     static int curseFinalizate;
 
-    // Constructor fără parametri
+public:
     CursaInternationala()
         : taraOrigine(nullptr),
         soferId(nullptr),
@@ -214,7 +279,6 @@ public:
         strcpy(dataPlecarii, "01/01/2024");
     }
 
-    // Constructor cu toți parametrii
     CursaInternationala(const char* origine, string destinatie, double distanta,
         double durata, int colete, const char* sofer, const char* data)
         : taraOrigine(nullptr),
@@ -240,7 +304,6 @@ public:
         strcpy(dataPlecarii, data);
     }
 
-    // Constructor de copiere
     CursaInternationala(const CursaInternationala& c)
         : taraOrigine(nullptr),
         soferId(nullptr),
@@ -265,27 +328,28 @@ public:
         strcpy(dataPlecarii, c.dataPlecarii);
     }
 
-    // Destructor
     ~CursaInternationala() {
         delete[] taraOrigine;
         delete[] soferId;
         delete[] dataPlecarii;
     }
 
-    // Operator =
     CursaInternationala& operator=(const CursaInternationala& c) {
         if (this != &c) {
             delete[] taraOrigine;
             delete[] soferId;
             delete[] dataPlecarii;
 
-            taraOrigine = new char[strlen(c.taraOrigine) + 1];
+            size_t len = strlen(c.taraOrigine);
+            taraOrigine = new char[len + 1];
             strcpy(taraOrigine, c.taraOrigine);
 
-            soferId = new char[strlen(c.soferId) + 1];
+            len = strlen(c.soferId);
+            soferId = new char[len + 1];
             strcpy(soferId, c.soferId);
 
-            dataPlecarii = new char[strlen(c.dataPlecarii) + 1];
+            len = strlen(c.dataPlecarii);
+            dataPlecarii = new char[len + 1];
             strcpy(dataPlecarii, c.dataPlecarii);
 
             taraDestinatie = c.taraDestinatie;
@@ -296,6 +360,66 @@ public:
             COD_CURSA = c.COD_CURSA;
         }
         return *this;
+    }
+
+    // GETTERI
+    const char* getTaraOrigine() const { return taraOrigine; }
+    string getTaraDestinatie() const { return taraDestinatie; }
+    double getDistantaKm() const { return distantaKm; }
+    double getDurataTimpOre() const { return durataTimpOre; }
+    int getNrColete() const { return nrColete; }
+    const char* getSoferId() const { return soferId; }
+    const char* getDataPlecarii() const { return dataPlecarii; }
+    bool getEsteFinalizata() const { return esteFinalizata; }
+    string getCodCursa() const { return COD_CURSA; }
+
+    // SETTERI
+    void setTaraOrigine(const char* tara) {
+        if (tara != nullptr) {
+            delete[] taraOrigine;
+            size_t len = strlen(tara);
+            taraOrigine = new char[len + 1];
+            strcpy(taraOrigine, tara);
+        }
+    }
+
+    void setTaraDestinatie(string tara) {
+        taraDestinatie = tara;
+    }
+
+    void setDistantaKm(double distanta) {
+        if (distanta >= 0) distantaKm = distanta;
+    }
+
+    void setDurataTimpOre(double durata) {
+        if (durata >= 0) durataTimpOre = durata;
+    }
+
+    void setNrColete(int nr) {
+        if (nr >= 0) nrColete = nr;
+    }
+
+    void setSoferId(const char* sofer) {
+        if (sofer != nullptr) {
+            delete[] soferId;
+            size_t len = strlen(sofer);
+            soferId = new char[len + 1];
+            strcpy(soferId, sofer);
+        }
+    }
+
+    void setDataPlecarii(const char* data) {
+        if (data != nullptr) {
+            delete[] dataPlecarii;
+            size_t len = strlen(data);
+            dataPlecarii = new char[len + 1];
+            strcpy(dataPlecarii, data);
+        }
+    }
+
+    void setEsteFinalizata(bool finalizata) {
+        esteFinalizata = finalizata;
+        if (finalizata) curseFinalizate++;
     }
 
     static double calculeazaCostTotalCursa(double distanta, int nrColete, bool urgenta = false) {
@@ -316,10 +440,14 @@ public:
 
     void citeste() {
         cout << "\n--- Introduceti datele cursei ---" << endl;
+        char buffer[200];
         cout << "Tara origine: ";
-        cin.getline(taraOrigine, 200);
+        cin.getline(buffer, 200);
+        setTaraOrigine(buffer);
+
         cout << "Tara destinatie: ";
         getline(cin, taraDestinatie);
+
         cout << "Distanta (km): ";
         cin >> distantaKm;
         cout << "Durata (ore): ";
@@ -327,16 +455,20 @@ public:
         cout << "Numar colete: ";
         cin >> nrColete;
         cin.ignore();
+
         cout << "ID sofer: ";
-        cin.getline(soferId, 200);
+        cin.getline(buffer, 200);
+        setSoferId(buffer);
+
         cout << "Data plecarii (DD/MM/YYYY): ";
-        cin.getline(dataPlecarii, 200);
+        cin.getline(buffer, 200);
+        setDataPlecarii(buffer);
     }
 
     void afiseaza() const {
-        cout << "\n========================================" << endl;
+        cout << "\n=" << endl;
         cout << "CURSA INTERNATIONALA" << endl;
-        cout << "========================================" << endl;
+        cout << "=" << endl;
         cout << "Cod: " << COD_CURSA << endl;
         cout << "Ruta: " << taraOrigine << " -> " << taraDestinatie << endl;
         cout << "Distanta: " << distantaKm << " km" << endl;
@@ -345,15 +477,18 @@ public:
         cout << "Sofer: " << soferId << endl;
         cout << "Data: " << dataPlecarii << endl;
         cout << "Status: " << (esteFinalizata ? "FINALIZATA" : "IN CURS") << endl;
-        cout << "========================================" << endl;
+        cout << "=" << endl;
     }
+
+    friend void optimizeazaRuta(CursaInternationala& cursa);
+    friend void afiseazaRaportCursa(const CursaInternationala& cursa);
 };
 
 //
-// CLASA 3: Factura - COMPLETA
+// CLASA 3: Factura - FAZA 2
 //
 class Factura {
-public:
+private:
     char* numarFactura;
     string dataEmitere;
     char* clientDenumire;
@@ -368,7 +503,7 @@ public:
     static int numarTotalFacturi;
     static double incasariTotale;
 
-    // Constructor fără parametri
+public:
     Factura()
         : numarFactura(nullptr),
         clientDenumire(nullptr),
@@ -388,7 +523,6 @@ public:
         strcpy(moneda, "RON");
     }
 
-    // Constructor cu toți parametrii
     Factura(const char* nr, string data, const char* client,
         double* preturi, int nrServ, const char* mon, bool platita)
         : numarFactura(nullptr),
@@ -421,7 +555,6 @@ public:
         }
     }
 
-    // Constructor de copiere
     Factura(const Factura& f)
         : numarFactura(nullptr),
         clientDenumire(nullptr),
@@ -453,7 +586,6 @@ public:
         }
     }
 
-    // Destructor
     ~Factura() {
         delete[] numarFactura;
         delete[] clientDenumire;
@@ -461,7 +593,6 @@ public:
         delete[] preturiServicii;
     }
 
-    // Operator =
     Factura& operator=(const Factura& f) {
         if (this != &f) {
             delete[] numarFactura;
@@ -469,13 +600,16 @@ public:
             delete[] moneda;
             delete[] preturiServicii;
 
-            numarFactura = new char[strlen(f.numarFactura) + 1];
+            size_t len = strlen(f.numarFactura);
+            numarFactura = new char[len + 1];
             strcpy(numarFactura, f.numarFactura);
 
-            clientDenumire = new char[strlen(f.clientDenumire) + 1];
+            len = strlen(f.clientDenumire);
+            clientDenumire = new char[len + 1];
             strcpy(clientDenumire, f.clientDenumire);
 
-            moneda = new char[strlen(f.moneda) + 1];
+            len = strlen(f.moneda);
+            moneda = new char[len + 1];
             strcpy(moneda, f.moneda);
 
             dataEmitere = f.dataEmitere;
@@ -496,6 +630,64 @@ public:
             ID_FACTURA = f.ID_FACTURA;
         }
         return *this;
+    }
+
+    // GETTERI
+    const char* getNumarFactura() const { return numarFactura; }
+    string getDataEmitere() const { return dataEmitere; }
+    const char* getClientDenumire() const { return clientDenumire; }
+    const double* getPreturiServicii() const { return preturiServicii; }
+    int getNrServicii() const { return nrServicii; }
+    double getTVA() const { return TVA; }
+    const char* getMoneda() const { return moneda; }
+    bool getEstePlatita() const { return estePlatita; }
+    int getID() const { return ID_FACTURA; }
+
+    // SETTERI
+    void setNumarFactura(const char* nr) {
+        if (nr != nullptr) {
+            delete[] numarFactura;
+            size_t len = strlen(nr);
+            numarFactura = new char[len + 1];
+            strcpy(numarFactura, nr);
+        }
+    }
+
+    void setDataEmitere(string data) {
+        dataEmitere = data;
+    }
+
+    void setClientDenumire(const char* client) {
+        if (client != nullptr) {
+            delete[] clientDenumire;
+            size_t len = strlen(client);
+            clientDenumire = new char[len + 1];
+            strcpy(clientDenumire, client);
+        }
+    }
+
+    void setPreturiServicii(double* preturi, int nr) {
+        if (preturi != nullptr && nr > 0) {
+            delete[] preturiServicii;
+            nrServicii = nr;
+            preturiServicii = new double[nrServicii];
+            for (int i = 0; i < nrServicii; i++) {
+                preturiServicii[i] = preturi[i];
+            }
+        }
+    }
+
+    void setMoneda(const char* mon) {
+        if (mon != nullptr) {
+            delete[] moneda;
+            size_t len = strlen(mon);
+            moneda = new char[len + 1];
+            strcpy(moneda, mon);
+        }
+    }
+
+    void setEstePlatita(bool platita) {
+        estePlatita = platita;
     }
 
     static double calculeazaTotalCuTVA(double sumaBaza) {
@@ -520,18 +712,27 @@ public:
 
     void citeste() {
         cout << "\n--- Introduceti datele facturii ---" << endl;
+        char buffer[200];
         cout << "Numar factura: ";
-        cin.getline(numarFactura, 50);
+        cin.getline(buffer, 50);
+        setNumarFactura(buffer);
+
         cout << "Data emitere (DD/MM/YYYY): ";
         getline(cin, dataEmitere);
+
         cout << "Denumire client: ";
-        cin.getline(clientDenumire, 200);
+        cin.getline(buffer, 200);
+        setClientDenumire(buffer);
+
         cout << "Moneda (RON/EUR/USD): ";
-        cin.getline(moneda, 10);
+        cin.getline(buffer, 10);
+        setMoneda(buffer);
+
         cout << "Numar servicii: ";
         cin >> nrServicii;
 
         if (nrServicii > 0) {
+            delete[] preturiServicii;
             preturiServicii = new double[nrServicii];
             for (int i = 0; i < nrServicii; i++) {
                 cout << "Pret serviciu " << (i + 1) << ": ";
@@ -542,9 +743,9 @@ public:
     }
 
     void afiseaza() const {
-        cout << "\n========================================" << endl;
+        cout << "\n=" << endl;
         cout << "FACTURA #" << ID_FACTURA << endl;
-        cout << "========================================" << endl;
+        cout << "=" << endl;
         cout << "Numar: " << numarFactura << endl;
         cout << "Data: " << dataEmitere << endl;
         cout << "Client: " << clientDenumire << endl;
@@ -554,7 +755,7 @@ public:
         cout << "TVA (" << (TVA * 100) << "%): " << (total * TVA) << " " << moneda << endl;
         cout << "Total cu TVA: " << (total * (1 + TVA)) << " " << moneda << endl;
         cout << "Status: " << (estePlatita ? "PLATITA" : "NEPLATITA") << endl;
-        cout << "========================================" << endl;
+        cout << "=" << endl;
     }
 
     void marcheazaPlatita() {
@@ -569,6 +770,9 @@ public:
             cout << "Factura este deja platita!" << endl;
         }
     }
+
+    friend void aplicaReducere(Factura& factura, double procentReducere);
+    friend void afiseazaRaportFactura(const Factura& factura);
 };
 
 // Initializare membri statici
@@ -583,13 +787,151 @@ int Factura::numarTotalFacturi = 0;
 double Factura::incasariTotale = 0.0;
 
 //
-// FUNCTIA MAIN
+// FUNCTII GLOBALE FRIEND - PENTRU ClientCorporativ
+//
+void aplicaDiscountSpecial(ClientCorporativ& client, double discountExtra) {
+    cout << "\n= APLICARE DISCOUNT SPECIAL =" << endl;
+    cout << "Client: " << client.numeCompanie << endl;
+    cout << "Volum curent: " << client.volumTransporturiLunar << " tone" << endl;
+
+    double volumNou = client.volumTransporturiLunar * (1 + discountExtra);
+    client.volumTransporturiLunar = volumNou;
+
+    cout << "Discount aplicat: " << (discountExtra * 100) << "%" << endl;
+    cout << "Volum bonus acordat: " << (volumNou - client.volumTransporturiLunar) << " tone" << endl;
+    cout << "Volum nou: " << client.volumTransporturiLunar << " tone" << endl;
+}
+
+void afiseazaRaportClient(const ClientCorporativ& client) {
+    cout << "\n RAPORT CLIENT DETALIAT " << endl;
+    cout << "ID: " << client.ID_CLIENT << endl;
+    cout << "Companie: " << client.numeCompanie << endl;
+    cout << "Sediu: " << client.adresaSediu << endl;
+    cout << "Contact: " << client.persoanaContact << endl;
+    cout << "Angajati: " << client.nrAngajati << endl;
+    cout << "Cod Fiscal: " << client.codFiscal << endl;
+    cout << "Volum lunar: " << client.volumTransporturiLunar << " tone" << endl;
+    cout << "Status: " << (client.esteActiv ? "ACTIV" : "INACTIV") << endl;
+
+    // Calcule suplimentare
+    double pretEstimat = 10000.0; // Pret mediu per transport
+    double pretFinal = ClientCorporativ::calculeazaPretFinal(pretEstimat, client.volumTransporturiLunar);
+    cout << "\nANALIZA FINANCIARA:" << endl;
+    cout << "Pret standard (estimat): " << pretEstimat << " EUR" << endl;
+    cout << "Pret cu discount: " << pretFinal << " EUR" << endl;
+    cout << "Economie lunara: " << (pretEstimat - pretFinal) << " EUR" << endl;
+    cout << "" << endl;
+}
+
+//
+// FUNCTII GLOBALE FRIEND - PENTRU CursaInternationala
+//
+void optimizeazaRuta(CursaInternationala& cursa) {
+    cout << "\n= OPTIMIZARE RUTA =" << endl;
+    cout << "Cursa: " << cursa.COD_CURSA << endl;
+    cout << "Ruta: " << cursa.taraOrigine << " -> " << cursa.taraDestinatie << endl;
+    cout << "Distanta initiala: " << cursa.distantaKm << " km" << endl;
+    cout << "Durata initiala: " << cursa.durataTimpOre << " ore" << endl;
+
+    // Simulare optimizare: reducere 8% distanta, 10% durata
+    double distantaOptimizata = cursa.distantaKm * 0.92;
+    double durataOptimizata = cursa.durataTimpOre * 0.90;
+
+    cursa.distantaKm = distantaOptimizata;
+    cursa.durataTimpOre = durataOptimizata;
+
+    cout << "\nDupa optimizare:" << endl;
+    cout << "Distanta noua: " << cursa.distantaKm << " km (economie: "
+        << (cursa.distantaKm * 0.08) << " km)" << endl;
+    cout << "Durata noua: " << cursa.durataTimpOre << " ore (economie: "
+        << (cursa.durataTimpOre * 0.10) << " ore)" << endl;
+    cout << "" << endl;
+}
+
+void afiseazaRaportCursa(const CursaInternationala& cursa) {
+    cout << "\n RAPORT CURSA DETALIAT " << endl;
+    cout << "Cod: " << cursa.COD_CURSA << endl;
+    cout << "Origine: " << cursa.taraOrigine << endl;
+    cout << "Destinatie: " << cursa.taraDestinatie << endl;
+    cout << "Distanta: " << cursa.distantaKm << " km" << endl;
+    cout << "Durata: " << cursa.durataTimpOre << " ore" << endl;
+    cout << "Colete: " << cursa.nrColete << endl;
+    cout << "Sofer: " << cursa.soferId << endl;
+    cout << "Data plecare: " << cursa.dataPlecarii << endl;
+    cout << "Status: " << (cursa.esteFinalizata ? "FINALIZATA" : "IN CURS") << endl;
+
+    // Calcule suplimentare
+    double cost = CursaInternationala::calculeazaCostTotalCursa(
+        cursa.distantaKm, cursa.nrColete, false);
+    double vitezaMedie = cursa.distantaKm / cursa.durataTimpOre;
+
+    cout << "\nANALIZA TEHNICA:" << endl;
+    cout << "Cost total estimat: " << cost << " EUR" << endl;
+    cout << "Viteza medie: " << vitezaMedie << " km/h" << endl;
+    cout << "Cost per km: " << (cost / cursa.distantaKm) << " EUR/km" << endl;
+    cout << "Cost per colet: " << (cost / cursa.nrColete) << " EUR/colet" << endl;
+    cout << "" << endl;
+}
+
+//
+// FUNCTII GLOBALE FRIEND - PENTRU Factura
+//
+void aplicaReducere(Factura& factura, double procentReducere) {
+    cout << "\n= APLICARE REDUCERE FACTURA =" << endl;
+    cout << "Factura: " << factura.numarFactura << endl;
+    cout << "Client: " << factura.clientDenumire << endl;
+
+    double totalInitial = factura.calculeazaTotal();
+    cout << "Total initial (fara TVA): " << totalInitial << " " << factura.moneda << endl;
+    cout << "Reducere aplicata: " << (procentReducere * 100) << "%" << endl;
+
+    // Aplica reducere pe toate preturile
+    for (int i = 0; i < factura.nrServicii; i++) {
+        factura.preturiServicii[i] *= (1 - procentReducere);
+    }
+
+    double totalNou = factura.calculeazaTotal();
+    cout << "Total nou (fara TVA): " << totalNou << " " << factura.moneda << endl;
+    cout << "Economie: " << (totalInitial - totalNou) << " " << factura.moneda << endl;
+    cout << "=" << endl;
+}
+
+void afiseazaRaportFactura(const Factura& factura) {
+    cout << "\n RAPORT FACTURA DETALIAT " << endl;
+    cout << "ID: " << factura.ID_FACTURA << endl;
+    cout << "Numar: " << factura.numarFactura << endl;
+    cout << "Data emitere: " << factura.dataEmitere << endl;
+    cout << "Client: " << factura.clientDenumire << endl;
+    cout << "Moneda: " << factura.moneda << endl;
+    cout << "Status: " << (factura.estePlatita ? "PLATITA" : "NEPLATITA") << endl;
+
+    cout << "\nDETALII SERVICII:" << endl;
+    for (int i = 0; i < factura.nrServicii; i++) {
+        cout << "  Serviciu " << (i + 1) << ": "
+            << factura.preturiServicii[i] << " " << factura.moneda << endl;
+    }
+
+    double total = factura.calculeazaTotal();
+    double tva = total * factura.TVA;
+    double totalCuTVA = total + tva;
+
+    cout << "\nANALIZA FINANCIARA:" << endl;
+    cout << "Subtotal: " << total << " " << factura.moneda << endl;
+    cout << "TVA (" << (factura.TVA * 100) << "%): " << tva << " " << factura.moneda << endl;
+    cout << "Total cu TVA: " << totalCuTVA << " " << factura.moneda << endl;
+    cout << "Pret mediu per serviciu: " << (total / factura.nrServicii)
+        << " " << factura.moneda << endl;
+    cout << "" << endl;
+}
+
+//
+// FUNCTIA MAIN - CU TESTE PENTRU FAZA 2
 //
 int main() {
-    cout << "========================================" << endl;
+    cout << "=" << endl;
     cout << "  SISTEM MANAGEMENT TRANSPORT" << endl;
-    cout << "  VERSIUNEA COMPLETA - FAZA 1" << endl;
-    cout << "========================================\n" << endl;
+    cout << "  VERSIUNEA COMPLETA - FAZA 2" << endl;
+    cout << "=\n" << endl;
 
     int optiune;
     vector<ClientCorporativ*> clienti;
@@ -597,7 +939,7 @@ int main() {
     vector<Factura*> facturi;
 
     do {
-        cout << "\n========== MENIU PRINCIPAL ===========" << endl;
+        cout << "\n MENIU PRINCIPAL =" << endl;
         cout << "--- CLIENTI CORPORATIVI ---" << endl;
         cout << "1. Creare client nou (citire)" << endl;
         cout << "2. Afisare toti clientii" << endl;
@@ -605,29 +947,41 @@ int main() {
         cout << "4. Calcul pret cu discount (functie statica)" << endl;
         cout << "5. Modificare discount corporativ" << endl;
         cout << "6. Afisare statistici clienti" << endl;
+        cout << "7. Test getteri/setteri Client" << endl;
+        cout << "8. Aplicare discount special (functie friend)" << endl;
+        cout << "9. Raport detaliat client (functie friend)" << endl;
+
         cout << "\n--- CURSE INTERNATIONALE ---" << endl;
-        cout << "7. Creare cursa noua (citire)" << endl;
-        cout << "8. Afisare toate cursele" << endl;
-        cout << "9. Test constructori Cursa" << endl;
-        cout << "10. Calcul cost total cursa (functie statica)" << endl;
-        cout << "11. Modificare taxa vamala" << endl;
-        cout << "12. Finalizare cursa" << endl;
-        cout << "13. Afisare statistici curse" << endl;
+        cout << "10. Creare cursa noua (citire)" << endl;
+        cout << "11. Afisare toate cursele" << endl;
+        cout << "12. Test constructori Cursa" << endl;
+        cout << "13. Calcul cost total cursa (functie statica)" << endl;
+        cout << "14. Modificare taxa vamala" << endl;
+        cout << "15. Finalizare cursa" << endl;
+        cout << "16. Afisare statistici curse" << endl;
+        cout << "17. Test getteri/setteri Cursa" << endl;
+        cout << "18. Optimizare ruta (functie friend)" << endl;
+        cout << "19. Raport detaliat cursa (functie friend)" << endl;
+
         cout << "\n--- FACTURI ---" << endl;
-        cout << "14. Creare factura noua (citire)" << endl;
-        cout << "15. Afisare toate facturile" << endl;
-        cout << "16. Marcare factura ca platita" << endl;
-        cout << "17. Test constructori Factura" << endl;
-        cout << "18. Modificare cota TVA" << endl;
-        cout << "19. Afisare statistici facturi" << endl;
+        cout << "20. Creare factura noua (citire)" << endl;
+        cout << "21. Afisare toate facturile" << endl;
+        cout << "22. Marcare factura ca platita" << endl;
+        cout << "23. Test constructori Factura" << endl;
+        cout << "24. Modificare cota TVA" << endl;
+        cout << "25. Afisare statistici facturi" << endl;
+        cout << "26. Test getteri/setteri Factura" << endl;
+        cout << "27. Aplicare reducere (functie friend)" << endl;
+        cout << "28. Raport detaliat factura (functie friend)" << endl;
+
         cout << "\n0. Iesire" << endl;
-        cout << "=======================================" << endl;
+        cout << "" << endl;
         cout << "Optiune: ";
         cin >> optiune;
         cin.ignore();
 
         switch (optiune) {
-            // ========== CLIENTI ==========
+            //  CLIENTI 
         case 1: {
             ClientCorporativ* c = new ClientCorporativ();
             c->citeste();
@@ -646,7 +1000,7 @@ int main() {
             break;
 
         case 3:
-            cout << "\n=== TEST CONSTRUCTORI CLIENT ===" << endl;
+            cout << "\n= TEST CONSTRUCTORI CLIENT =" << endl;
             {
                 cout << "\n1. Constructor fara parametri:" << endl;
                 ClientCorporativ c1;
@@ -691,14 +1045,79 @@ int main() {
         }
 
         case 6:
-            cout << "\n=== STATISTICI CLIENTI ===" << endl;
+            cout << "\n= STATISTICI CLIENTI =" << endl;
             cout << "Total clienti: " << ClientCorporativ::getNumarTotalClienti() << endl;
             cout << "Clienti activi: " << ClientCorporativ::getClientiActivi() << endl;
             cout << "Discount: " << (ClientCorporativ::getDiscount() * 100) << "%" << endl;
             break;
 
-            // ========== CURSE ==========
         case 7: {
+            cout << "\n= TEST GETTERI/SETTERI CLIENT =" << endl;
+            ClientCorporativ c;
+            cout << "Client initial:" << endl;
+            c.afiseaza();
+
+            cout << "\nModificare date prin setteri..." << endl;
+            c.setNumeCompanie("LogisticsPro SRL");
+            c.setNrAngajati(75);
+            c.setVolumTransporturiLunar(2500.0);
+            c.setAdresaSediu("Bulevardul Unirii 45");
+            c.setPersoanaContact("Maria Ionescu");
+
+            cout << "\nClient dupa modificare:" << endl;
+            c.afiseaza();
+
+            cout << "\nTestare getteri:" << endl;
+            cout << "Nume: " << c.getNumeCompanie() << endl;
+            cout << "Angajati: " << c.getNrAngajati() << endl;
+            cout << "Volum: " << c.getVolumTransporturiLunar() << " tone" << endl;
+            cout << "✓ Getteri/Setteri functioneaza!" << endl;
+            break;
+        }
+
+        case 8: {
+            if (clienti.empty()) {
+                cout << "\nNu exista clienti!" << endl;
+            }
+            else {
+                cout << "\n= CLIENTI DISPONIBILI =" << endl;
+                for (size_t i = 0; i < clienti.size(); i++) {
+                    cout << (i + 1) << ". " << clienti[i]->getNumeCompanie() << endl;
+                }
+                int idx;
+                cout << "Selectati client: ";
+                cin >> idx;
+                if (idx >= 1 && idx <= (int)clienti.size()) {
+                    double discount;
+                    cout << "Discount special (0-1, ex: 0.10 pentru 10%): ";
+                    cin >> discount;
+                    aplicaDiscountSpecial(*clienti[idx - 1], discount);
+                }
+            }
+            break;
+        }
+
+        case 9: {
+            if (clienti.empty()) {
+                cout << "\nNu exista clienti!" << endl;
+            }
+            else {
+                cout << "\n= CLIENTI DISPONIBILI =" << endl;
+                for (size_t i = 0; i < clienti.size(); i++) {
+                    cout << (i + 1) << ". " << clienti[i]->getNumeCompanie() << endl;
+                }
+                int idx;
+                cout << "Selectati client: ";
+                cin >> idx;
+                if (idx >= 1 && idx <= (int)clienti.size()) {
+                    afiseazaRaportClient(*clienti[idx - 1]);
+                }
+            }
+            break;
+        }
+
+              //  CURSE 
+        case 10: {
             CursaInternationala* c = new CursaInternationala();
             c->citeste();
             curse.push_back(c);
@@ -706,7 +1125,7 @@ int main() {
             break;
         }
 
-        case 8:
+        case 11:
             if (curse.empty()) {
                 cout << "\nNu exista curse!" << endl;
             }
@@ -715,8 +1134,8 @@ int main() {
             }
             break;
 
-        case 9:
-            cout << "\n=== TEST CONSTRUCTORI CURSA ===" << endl;
+        case 12:
+            cout << "\n= TEST CONSTRUCTORI CURSA ===" << endl;
             {
                 cout << "\n1. Constructor fara parametri:" << endl;
                 CursaInternationala c1;
@@ -738,7 +1157,7 @@ int main() {
             cout << "\n✓ Toti constructorii functioneaza!" << endl;
             break;
 
-        case 10: {
+        case 13: {
             double dist;
             int col;
             char urg;
@@ -754,7 +1173,7 @@ int main() {
             break;
         }
 
-        case 11: {
+        case 14: {
             double taxa;
             cout << "\nTaxa vamala curenta: " << CursaInternationala::getTaxaVamala() << " EUR" << endl;
             cout << "Noua taxa: ";
@@ -764,37 +1183,28 @@ int main() {
             break;
         }
 
-        case 12: {
+        case 15: {
             if (curse.empty()) {
                 cout << "\nNu exista curse!" << endl;
             }
             else {
                 cout << "\n=== CURSE DISPONIBILE ===" << endl;
                 for (size_t i = 0; i < curse.size(); i++) {
-                    cout << (i + 1) << ". " << curse[i]->COD_CURSA
-                        << " - Status: " << (curse[i]->esteFinalizata ? "FINALIZATA" : "IN CURS") << endl;
+                    cout << (i + 1) << ". " << curse[i]->getCodCursa()
+                        << " - Status: " << (curse[i]->getEsteFinalizata() ? "FINALIZATA" : "IN CURS") << endl;
                 }
                 int idx;
                 cout << "Selectati cursa: ";
                 cin >> idx;
                 if (idx >= 1 && idx <= (int)curse.size()) {
-                    if (!curse[idx - 1]->esteFinalizata) {
-                        curse[idx - 1]->esteFinalizata = true;
-                        CursaInternationala::curseFinalizate++;
-                        cout << "✓ Cursa finalizata!" << endl;
-                    }
-                    else {
-                        cout << "Cursa este deja finalizata!" << endl;
-                    }
-                }
-                else {
-                    cout << "Numar invalid!" << endl;
+                    curse[idx - 1]->setEsteFinalizata(true);
+                    cout << "✓ Cursa finalizata!" << endl;
                 }
             }
             break;
         }
 
-        case 13:
+        case 16:
             cout << "\n=== STATISTICI CURSE ===" << endl;
             cout << "Total curse: " << CursaInternationala::getNumarTotalCurse() << endl;
             cout << "Curse finalizate: " << CursaInternationala::getCurseFinalizate() << endl;
@@ -802,8 +1212,72 @@ int main() {
             cout << "Taxa vamala: " << CursaInternationala::getTaxaVamala() << " EUR" << endl;
             break;
 
-            // ========== FACTURI ==========
-        case 14: {
+        case 17: {
+            cout << "\n=== TEST GETTERI/SETTERI CURSA ===" << endl;
+            CursaInternationala c;
+            cout << "Cursa initiala:" << endl;
+            c.afiseaza();
+
+            cout << "\nModificare date prin setteri..." << endl;
+            c.setTaraOrigine("Bulgaria");
+            c.setTaraDestinatie("Franta");
+            c.setDistantaKm(2800.0);
+            c.setDurataTimpOre(32.5);
+            c.setNrColete(50);
+            c.setSoferId("SOF-999");
+            c.setDataPlecarii("20/11/2024");
+
+            cout << "\nCursa dupa modificare:" << endl;
+            c.afiseaza();
+
+            cout << "\nTestare getteri:" << endl;
+            cout << "Origine: " << c.getTaraOrigine() << endl;
+            cout << "Destinatie: " << c.getTaraDestinatie() << endl;
+            cout << "Distanta: " << c.getDistantaKm() << " km" << endl;
+            cout << "✓ Getteri/Setteri functioneaza!" << endl;
+            break;
+        }
+
+        case 18: {
+            if (curse.empty()) {
+                cout << "\nNu exista curse!" << endl;
+            }
+            else {
+                cout << "\n=== CURSE DISPONIBILE ===" << endl;
+                for (size_t i = 0; i < curse.size(); i++) {
+                    cout << (i + 1) << ". " << curse[i]->getCodCursa() << endl;
+                }
+                int idx;
+                cout << "Selectati cursa: ";
+                cin >> idx;
+                if (idx >= 1 && idx <= (int)curse.size()) {
+                    optimizeazaRuta(*curse[idx - 1]);
+                }
+            }
+            break;
+        }
+
+        case 19: {
+            if (curse.empty()) {
+                cout << "\nNu exista curse!" << endl;
+            }
+            else {
+                cout << "\n=== CURSE DISPONIBILE ===" << endl;
+                for (size_t i = 0; i < curse.size(); i++) {
+                    cout << (i + 1) << ". " << curse[i]->getCodCursa() << endl;
+                }
+                int idx;
+                cout << "Selectati cursa: ";
+                cin >> idx;
+                if (idx >= 1 && idx <= (int)curse.size()) {
+                    afiseazaRaportCursa(*curse[idx - 1]);
+                }
+            }
+            break;
+        }
+
+               // ========== FACTURI ==========
+        case 20: {
             Factura* f = new Factura();
             f->citeste();
             facturi.push_back(f);
@@ -811,7 +1285,7 @@ int main() {
             break;
         }
 
-        case 15:
+        case 21:
             if (facturi.empty()) {
                 cout << "\nNu exista facturi!" << endl;
             }
@@ -820,16 +1294,16 @@ int main() {
             }
             break;
 
-        case 16: {
+        case 22: {
             if (facturi.empty()) {
                 cout << "\nNu exista facturi!" << endl;
             }
             else {
                 cout << "\n=== FACTURI DISPONIBILE ===" << endl;
                 for (size_t i = 0; i < facturi.size(); i++) {
-                    cout << (i + 1) << ". " << facturi[i]->numarFactura
-                        << " - " << facturi[i]->clientDenumire
-                        << " - Status: " << (facturi[i]->estePlatita ? "PLATITA" : "NEPLATITA") << endl;
+                    cout << (i + 1) << ". " << facturi[i]->getNumarFactura()
+                        << " - " << facturi[i]->getClientDenumire()
+                        << " - Status: " << (facturi[i]->getEstePlatita() ? "PLATITA" : "NEPLATITA") << endl;
                 }
                 int idx;
                 cout << "Selectati factura: ";
@@ -837,14 +1311,11 @@ int main() {
                 if (idx >= 1 && idx <= (int)facturi.size()) {
                     facturi[idx - 1]->marcheazaPlatita();
                 }
-                else {
-                    cout << "Numar invalid!" << endl;
-                }
             }
             break;
         }
 
-        case 17:
+        case 23:
             cout << "\n=== TEST CONSTRUCTORI FACTURA ===" << endl;
             {
                 cout << "\n1. Constructor fara parametri:" << endl;
@@ -868,7 +1339,7 @@ int main() {
             cout << "\n✓ Toti constructorii functioneaza!" << endl;
             break;
 
-        case 18: {
+        case 24: {
             double tva;
             cout << "\nCota TVA curenta: " << (Factura::getCotaTVA() * 100) << "%" << endl;
             cout << "Noua cota (0-1, ex: 0.19): ";
@@ -878,7 +1349,7 @@ int main() {
             break;
         }
 
-        case 19:
+        case 25:
             cout << "\n=== STATISTICI FACTURI ===" << endl;
             cout << "Total facturi: " << Factura::getNumarTotalFacturi() << endl;
             cout << "Incasari totale: " << Factura::getIncasariTotale() << " RON" << endl;
@@ -886,13 +1357,82 @@ int main() {
             {
                 int platite = 0, neplatite = 0;
                 for (auto f : facturi) {
-                    if (f->estePlatita) platite++;
+                    if (f->getEstePlatita()) platite++;
                     else neplatite++;
                 }
                 cout << "Facturi platite: " << platite << endl;
                 cout << "Facturi neplatite: " << neplatite << endl;
             }
             break;
+
+        case 26: {
+            cout << "\n=== TEST GETTERI/SETTERI FACTURA ===" << endl;
+            Factura f;
+            cout << "Factura initiala:" << endl;
+            f.afiseaza();
+
+            cout << "\nModificare date prin setteri..." << endl;
+            f.setNumarFactura("FACT-2024-999");
+            f.setDataEmitere("25/11/2024");
+            f.setClientDenumire("MegaTransport SRL");
+            f.setMoneda("EUR");
+            double preturiNoi[] = { 2000.0, 1500.0 };
+            f.setPreturiServicii(preturiNoi, 2);
+
+            cout << "\nFactura dupa modificare:" << endl;
+            f.afiseaza();
+
+            cout << "\nTestare getteri:" << endl;
+            cout << "Numar: " << f.getNumarFactura() << endl;
+            cout << "Client: " << f.getClientDenumire() << endl;
+            cout << "Moneda: " << f.getMoneda() << endl;
+            cout << "Nr. servicii: " << f.getNrServicii() << endl;
+            cout << "✓ Getteri/Setteri functioneaza!" << endl;
+            break;
+        }
+
+        case 27: {
+            if (facturi.empty()) {
+                cout << "\nNu exista facturi!" << endl;
+            }
+            else {
+                cout << "\n=== FACTURI DISPONIBILE ===" << endl;
+                for (size_t i = 0; i < facturi.size(); i++) {
+                    cout << (i + 1) << ". " << facturi[i]->getNumarFactura()
+                        << " - " << facturi[i]->getClientDenumire() << endl;
+                }
+                int idx;
+                cout << "Selectati factura: ";
+                cin >> idx;
+                if (idx >= 1 && idx <= (int)facturi.size()) {
+                    double reducere;
+                    cout << "Procent reducere (0-1, ex: 0.15 pentru 15%): ";
+                    cin >> reducere;
+                    aplicaReducere(*facturi[idx - 1], reducere);
+                }
+            }
+            break;
+        }
+
+        case 28: {
+            if (facturi.empty()) {
+                cout << "\nNu exista facturi!" << endl;
+            }
+            else {
+                cout << "\n=== FACTURI DISPONIBILE " << endl;
+                for (size_t i = 0; i < facturi.size(); i++) {
+                    cout << (i + 1) << ". " << facturi[i]->getNumarFactura()
+                        << " - " << facturi[i]->getClientDenumire() << endl;
+                }
+                int idx;
+                cout << "Selectati factura: ";
+                cin >> idx;
+                if (idx >= 1 && idx <= (int)facturi.size()) {
+                    afiseazaRaportFactura(*facturi[idx - 1]);
+                }
+            }
+            break;
+        }
 
         case 0:
             cout << "\nIesire din program..." << endl;
