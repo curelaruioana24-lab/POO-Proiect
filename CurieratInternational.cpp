@@ -1350,9 +1350,15 @@ int main() {
     vector<CursaInternationala*> curse;
     vector<Factura*> facturi;
 
+    // VECTORI pentru testare Faza 4
+    vector<ClientCorporativ> vectorClienti;
+    vector<CursaInternationala> vectorCurse;
+    vector<Factura> vectorFacturi;
+
+
     do {
         cout << "\n MENIU PRINCIPAL " << endl;
-        cout << "--- CLIENTI CORPORATIVI ---" << endl;
+        cout << " CLIENTI CORPORATIVI " << endl;
         cout << "1. Creare client nou (citire)" << endl;
         cout << "2. Afisare toti clientii" << endl;
         cout << "3. Test constructori Client (si operatori)" << endl;
@@ -1363,7 +1369,7 @@ int main() {
         cout << "8. Aplicare discount special (functie friend)" << endl;
         cout << "9. Raport detaliat client (functie friend)" << endl;
 
-        cout << "\n--- CURSE INTERNATIONALE ---" << endl;
+        cout << "\n  CURSE INTERNATIONALE " << endl;
         cout << "10. Creare cursa noua (citire)" << endl;
         cout << "11. Afisare toate cursele" << endl;
         cout << "12. Test constructori Cursa (si operatori)" << endl;
@@ -1375,7 +1381,7 @@ int main() {
         cout << "18. Optimizare ruta (functie friend)" << endl;
         cout << "19. Raport detaliat cursa (functie friend)" << endl;
 
-        cout << "\n--- FACTURI ---" << endl;
+        cout << "\n  FACTURI " << endl;
         cout << "20. Creare factura noua (citire)" << endl;
         cout << "21. Afisare toate facturile" << endl;
         cout << "22. Marcare factura ca platita" << endl;
@@ -1385,7 +1391,9 @@ int main() {
         cout << "26. Test getteri/setteri Factura" << endl;
         cout << "27. Aplicare reducere (functie friend)" << endl;
         cout << "28. Raport detaliat factura (functie friend)" << endl;
-
+        cout << "\n  FAZA 4 - VECTORI SI MATRICE " << endl;
+        cout << "29. Test complet Faza 4 (vectori + matrice)" << endl;
+        cout << "30. Operatii avansate (submeniu: operatori, comparatie, matrice)" << endl;
         cout << "\n0. Iesire" << endl;
         cout << "" << endl;
         cout << "Optiune: ";
@@ -1926,6 +1934,748 @@ int main() {
                     afiseazaRaportFactura(*facturi[idx - 1]);
                 }
             }
+            break;
+        }
+
+
+        case 29: {
+            
+            cout << "   TEST FAZA 4 - VECTORI DE OBIECTE" << endl;
+
+            // 1. Populare vector ClientCorporativ
+            cout << "1. VECTOR CLIENTI CORPORATIVI " << endl;
+            vectorClienti.push_back(ClientCorporativ("Alpha Trans SRL", "Bucuresti, Str. Industriala 10",
+                "Ion Popescu", 50, "RO12345678", 1500.0, true));
+            vectorClienti.push_back(ClientCorporativ("Beta Logistics SRL", "Cluj-Napoca, Calea Turzii 45",
+                "Maria Ionescu", 75, "RO87654321", 2800.0, true));
+            vectorClienti.push_back(ClientCorporativ("Gamma Cargo SRL", "Timisoara, Bd. Revolutiei 23",
+                "Andrei Vasilescu", 30, "RO11223344", 900.0, true));
+
+            cout << "✓ Adaugat " << vectorClienti.size() << " clienti in vector\n" << endl;
+
+            // Citire de la tastatura
+            cout << "Introduceti date pentru un client nou:" << endl;
+            ClientCorporativ clientNou;
+            cin >> clientNou;
+            vectorClienti.push_back(clientNou);
+
+            // Afisare vector clienti
+            cout << "\n AFISARE VECTOR CLIENTI " << endl;
+            for (size_t i = 0; i < vectorClienti.size(); i++) {
+                cout << "\n[Client " << (i + 1) << "]";
+                cout << vectorClienti[i];
+            }
+
+            // 2. Populare vector CursaInternationala
+            cout << "\n 2. VECTOR CURSE INTERNATIONALE" << endl;
+            vectorCurse.push_back(CursaInternationala("Romania", "Germania", 2150.0, 24.5, 35, "SOF-101", "15/11/2024"));
+            vectorCurse.push_back(CursaInternationala("Romania", "Franta", 2800.0, 32.0, 50, "SOF-102", "16/11/2024"));
+            vectorCurse.push_back(CursaInternationala("Romania", "Italia", 1900.0, 22.0, 40, "SOF-103", "17/11/2024"));
+
+            cout << " Adaugat " << vectorCurse.size() << " curse in vector\n" << endl;
+
+            // Citire de la tastatura
+            cout << "Introduceti date pentru o cursa noua:" << endl;
+            CursaInternationala cursaNoua;
+            cin >> cursaNoua;
+            vectorCurse.push_back(cursaNoua);
+
+            // Afisare vector curse
+            cout << "\n AFISARE VECTOR CURSE " << endl;
+            for (size_t i = 0; i < vectorCurse.size(); i++) {
+                cout << "\n[Cursa " << (i + 1) << "]";
+                cout << vectorCurse[i];
+            }
+
+            // 3. Populare vector Factura
+            cout << "\n 3. VECTOR FACTURI " << endl;
+            double preturi1[] = { 1000.0, 500.0, 250.0 };
+            double preturi2[] = { 1500.0, 750.0 };
+            double preturi3[] = { 2000.0, 1000.0, 500.0, 250.0 };
+
+            vectorFacturi.push_back(Factura("FACT-2024-001", "13/11/2024", "Alpha Trans SRL",
+                preturi1, 3, "EUR", false));
+            vectorFacturi.push_back(Factura("FACT-2024-002", "14/11/2024", "Beta Logistics SRL",
+                preturi2, 2, "EUR", true));
+            vectorFacturi.push_back(Factura("FACT-2024-003", "15/11/2024", "Gamma Cargo SRL",
+                preturi3, 4, "EUR", false));
+
+            cout << " Adaugat " << vectorFacturi.size() << " facturi in vector\n" << endl;
+
+            // Citire de la tastatura
+            cout << "Introduceti date pentru o factura noua:" << endl;
+            Factura facturaNoua;
+            cin >> facturaNoua;
+            vectorFacturi.push_back(facturaNoua);
+
+            // Afisare vector facturi
+            cout << "\n AFISARE VECTOR FACTURI" << endl;
+            for (size_t i = 0; i < vectorFacturi.size(); i++) {
+                cout << "\n[Factura " << (i + 1) << "]";
+                cout << vectorFacturi[i];
+            }
+
+            // 4. Creare MATRICE de obiecte (ClientCorporativ)
+            cout << "\n 4. MATRICE DE CLIENTI (3x2) " << endl;
+            const int ROWS = 3;
+            const int COLS = 2;
+            ClientCorporativ matriceClienti[ROWS][COLS];
+
+            // Initializare cu date
+            matriceClienti[0][0] = ClientCorporativ("Matrice Client 1-1", "Adresa 1-1", "Contact 1-1",
+                10, "RO11111111", 500.0, true);
+            matriceClienti[0][1] = ClientCorporativ("Matrice Client 1-2", "Adresa 1-2", "Contact 1-2",
+                20, "RO22222222", 600.0, true);
+            matriceClienti[1][0] = ClientCorporativ("Matrice Client 2-1", "Adresa 2-1", "Contact 2-1",
+                15, "RO33333333", 700.0, true);
+            matriceClienti[1][1] = ClientCorporativ("Matrice Client 2-2", "Adresa 2-2", "Contact 2-2",
+                25, "RO44444444", 800.0, true);
+            matriceClienti[2][0] = ClientCorporativ("Matrice Client 3-1", "Adresa 3-1", "Contact 3-1",
+                30, "RO55555555", 900.0, true);
+            matriceClienti[2][1] = ClientCorporativ("Matrice Client 3-2", "Adresa 3-2", "Contact 3-2",
+                35, "RO66666666", 1000.0, true);
+
+            cout << " Creat matrice " << ROWS << "x" << COLS << " de clienti\n" << endl;
+
+            // Afisare matrice
+            cout << "\n AFISARE MATRICE CLIENTI " << endl;
+            for (int i = 0; i < ROWS; i++) {
+                for (int j = 0; j < COLS; j++) {
+                    cout << "\n[Pozitia [" << i << "][" << j << "]]";
+                    cout << matriceClienti[i][j];
+                }
+            }
+
+            cout << "   TEST FAZA 4 FINALIZAT CU SUCCES!" << endl;
+          
+            break;
+        }
+        
+        case 30: {
+            int subOptiune;
+            do {
+                cout << "   SUBMENIU FAZA 4 - OPERATII AVANSATE" << endl;
+                cout << "1. Test intensiv operatori pe obiecte noi" << endl;
+                cout << "2. Analiza comparativa intre clase" << endl;
+                cout << "3. Operatii avansate cu matrice" << endl;
+                cout << "0. Inapoi la meniul principal" << endl;
+                cout << "Optiune: ";
+                cin >> subOptiune;
+                cin.ignore();
+
+                switch (subOptiune) {
+                   
+                    // SUB-CASE 1: TEST INTENSIV OPERATORI
+                case 1: {
+                     
+                    cout << "   TEST INTENSIV OPERATORI - TOATE CLASELE" << endl;
+                     
+
+                    //   TESTE CLIENTI CORPORATIVI  
+                    cout << "\n TESTE CLIENTCORPORATIV \n" << endl;
+
+                    ClientCorporativ c1("Alpha Transport SRL", "Bucuresti, Str. Industriala 10",
+                        "Ion Popescu", 50, "RO12345678", 1500.0, true);
+                    ClientCorporativ c2("Beta Logistics SRL", "Cluj-Napoca, Calea Turzii 45",
+                        "Maria Ionescu", 75, "RO87654321", 2800.0, true);
+                    ClientCorporativ c3("Gamma Cargo SRL", "Timisoara, Bd. Revolutiei 23",
+                        "Andrei Vasilescu", 30, "RO11223344", 900.0, true);
+
+                    cout << "  1. OPERATORI DE COMPARARE  " << endl;
+                    cout << "c1 == c2 (volum)? " << (c1 == c2 ? "DA" : "NU") << endl;
+                    cout << "c1 == c3 (volum)? " << (c1 == c3 ? "DA" : "NU") << endl;
+                    cout << "c1 < c2 (volum)? " << (c1 < c2 ? "DA" : "NU") << endl;
+                    cout << "c2 > c3 (volum)? " << (c2 > c3 ? "DA" : "NU") << endl;
+                    cout << "c1 < c3 (volum)? " << (c1 < c3 ? "DA" : "NU") << endl;
+
+                    cout << "\n  2. OPERATORI ARITMETICI  " << endl;
+                    cout << "c1 angajati initial: " << c1.getNrAngajati() << endl;
+                    ClientCorporativ c4 = c1 + 25;  // adaugă 25 angajați
+                    cout << "c4 = c1 + 25 angajati: " << c4.getNrAngajati() << endl;
+
+                    ClientCorporativ c5 = c2 - 10;  // scade 10 angajați
+                    cout << "c2 angajati initial: " << c2.getNrAngajati() << endl;
+                    cout << "c5 = c2 - 10 angajati: " << c5.getNrAngajati() << endl;
+
+                    cout << "\n  3. OPERATOR += (mutativ)  " << endl;
+                    cout << "c1 volum inainte: " << c1.getVolumTransporturiLunar() << " tone" << endl;
+                    c1 += 500.0;  // crește volumul cu 500 tone
+                    cout << "c1 volum dupa +=500: " << c1.getVolumTransporturiLunar() << " tone" << endl;
+
+                    cout << "\n  4. OPERATORI INCREMENT  " << endl;
+                    cout << "c2 angajati inainte: " << c2.getNrAngajati() << endl;
+                    ++c2;  // pre-increment
+                    cout << "c2 angajati dupa ++c2: " << c2.getNrAngajati() << endl;
+                    ClientCorporativ c6 = c2++;  // post-increment
+                    cout << "c2 angajati dupa c2++: " << c2.getNrAngajati() << endl;
+                    cout << "c6 angajati (copie): " << c6.getNrAngajati() << endl;
+
+                    cout << "\n  5. OPERATOR [] (indexare)  " << endl;
+                    cout << "Primul caracter din numele c1: '" << c1[0] << "'" << endl;
+                    cout << "Al doilea caracter din numele c1: '" << c1[1] << "'" << endl;
+                    cout << "Al treilea caracter din numele c1: '" << c1[2] << "'" << endl;
+                    cout << "Index invalid (100): '" << c1[100] << "' (ar trebui \\0)" << endl;
+
+                    cout << "\n  6. OPERATOR () - functie  " << endl;
+                    double costTotal = 100000.0;
+                    double costPerAngajat = c1(costTotal);
+                    cout << "Cost total: " << costTotal << " EUR" << endl;
+                    cout << "Nr angajati c1: " << c1.getNrAngajati() << endl;
+                    cout << "Cost per angajat: " << costPerAngajat << " EUR" << endl;
+
+                    cout << "\n  7. OPERATOR ! (negatie)  " << endl;
+                    cout << "c1 este inactiv (!c1)? " << (!c1 ? "DA" : "NU") << endl;
+                    c1.setEsteActiv(false);
+                    cout << "Dupa setare inactiv, c1 este inactiv? " << (!c1 ? "DA" : "NU") << endl;
+                    c1.setEsteActiv(true);  // restabilire
+
+                    cout << "\n  8. OPERATOR CAST LA INT  " << endl;
+                    int nrAngajatiC2 = static_cast<int>(c2);
+                    cout << "Cast c2 la int (nr angajati): " << nrAngajatiC2 << endl;
+                    int nrAngajatiC3 = static_cast<int>(c3);
+                    cout << "Cast c3 la int (nr angajati): " << nrAngajatiC3 << endl;
+
+                    //   TESTE CURSE INTERNATIONALE  
+                    cout << "\n\n  TESTE CURSAINTERNATIONALA \n" << endl;
+
+                    CursaInternationala cr1("Romania", "Germania", 2150.0, 24.5, 35, "SOF-101", "15/11/2024");
+                    CursaInternationala cr2("Romania", "Franta", 2800.0, 32.0, 50, "SOF-102", "16/11/2024");
+                    CursaInternationala cr3("Romania", "Italia", 1900.0, 22.0, 40, "SOF-103", "17/11/2024");
+
+                    cout << "  1. OPERATORI DE COMPARARE  " << endl;
+                    cout << "cr1 == cr2 (distanta)? " << (cr1 == cr2 ? "DA" : "NU") << endl;
+                    cout << "cr1 < cr2 (distanta)? " << (cr1 < cr2 ? "DA" : "NU") << endl;
+                    cout << "cr2 > cr3 (distanta)? " << (cr2 > cr3 ? "DA" : "NU") << endl;
+                    cout << "cr3 < cr1 (distanta)? " << (cr3 < cr1 ? "DA" : "NU") << endl;
+
+                    cout << "\n  2. OPERATORI ARITMETICI  " << endl;
+                    cout << "cr1 colete initial: " << cr1.getNrColete() << endl;
+                    CursaInternationala cr4 = cr1 + 15;  // adaugă 15 colete
+                    cout << "cr4 = cr1 + 15 colete: " << cr4.getNrColete() << endl;
+
+                    CursaInternationala cr5 = cr2 - 5;  // scade 5 colete
+                    cout << "cr2 colete initial: " << cr2.getNrColete() << endl;
+                    cout << "cr5 = cr2 - 5 colete: " << cr5.getNrColete() << endl;
+
+                    cout << "\n  3. OPERATOR +=  " << endl;
+                    cout << "cr1 distanta inainte: " << cr1.getDistantaKm() << " km" << endl;
+                    cr1 += 150.0;  // crește distanța cu 150 km
+                    cout << "cr1 distanta dupa +=150: " << cr1.getDistantaKm() << " km" << endl;
+
+                    cout << "\n  4. OPERATORI INCREMENT  " << endl;
+                    cout << "cr2 colete inainte: " << cr2.getNrColete() << endl;
+                    ++cr2;
+                    cout << "cr2 colete dupa ++cr2: " << cr2.getNrColete() << endl;
+                    cr2++;
+                    cout << "cr2 colete dupa cr2++: " << cr2.getNrColete() << endl;
+
+                    cout << "\n  5. OPERATOR []  " << endl;
+                    cout << "Primul caracter origine cr1: '" << cr1[0] << "'" << endl;
+                    cout << "Al doilea caracter origine cr1: '" << cr1[1] << "'" << endl;
+
+                    cout << "\n  6. OPERATOR () - viteza medie  " << endl;
+                    double vitezaMedie1 = cr1();
+                    cout << "Viteza medie cr1: " << vitezaMedie1 << " km/h" << endl;
+                    double vitezaMedie2 = cr2();
+                    cout << "Viteza medie cr2: " << vitezaMedie2 << " km/h" << endl;
+
+                    cout << "\n  7. OPERATOR !  " << endl;
+                    cout << "cr1 nu este finalizata (!cr1)? " << (!cr1 ? "DA" : "NU") << endl;
+                    cr1.setEsteFinalizata(true);
+                    cout << "Dupa finalizare, cr1 nu este finalizata? " << (!cr1 ? "DA" : "NU") << endl;
+                    cr1.setEsteFinalizata(false);  // restabilire
+
+                    cout << "\n  8. OPERATOR CAST LA DOUBLE  " << endl;
+                    double distantaCr2 = static_cast<double>(cr2);
+                    cout << "Cast cr2 la double (distanta): " << distantaCr2 << " km" << endl;
+
+                    //   TESTE FACTURI  
+                    cout << "\n\n  TESTE FACTURA \n" << endl;
+
+                    double preturi1[] = { 1000.0, 500.0, 250.0 };
+                    double preturi2[] = { 1500.0, 750.0, 300.0, 200.0 };
+                    double preturi3[] = { 2000.0, 1000.0 };
+
+                    Factura f1("FACT-2024-001", "13/11/2024", "Alpha Transport SRL",
+                        preturi1, 3, "EUR", false);
+                    Factura f2("FACT-2024-002", "14/11/2024", "Beta Logistics SRL",
+                        preturi2, 4, "EUR", true);
+                    Factura f3("FACT-2024-003", "15/11/2024", "Gamma Cargo SRL",
+                        preturi3, 2, "EUR", false);
+
+                    cout <<  " 1. OPERATORI DE COMPARARE  " << endl;
+                    cout << "Total f1: " << f1.calculeazaTotal() << " EUR" << endl;
+                    cout << "Total f2: " << f2.calculeazaTotal() << " EUR" << endl;
+                    cout << "Total f3: " << f3.calculeazaTotal() << " EUR" << endl;
+                    cout << "f1 == f2 (total)? " << (f1 == f2 ? "DA" : "NU") << endl;
+                    cout << "f1 < f2 (total)? " << (f1 < f2 ? "DA" : "NU") << endl;
+                    cout << "f2 > f3 (total)? " << (f2 > f3 ? "DA" : "NU") << endl;
+
+                    cout << "\n  2. OPERATORI ARITMETICI " << endl;
+                    cout << "f1 nr servicii initial: " << f1.getNrServicii() << endl;
+                    Factura f4 = f1 + 350.0;  // adaugă serviciu de 350 EUR
+                    cout << "f4 = f1 + serviciu 350 EUR" << endl;
+                    cout << "f4 nr servicii: " << f4.getNrServicii() << endl;
+                    cout << "f4 total nou: " << f4.calculeazaTotal() << " EUR" << endl;
+
+                    Factura f5 = f2 - 50.0;  // scade 50 EUR din toate serviciile
+                    cout << "\nf2 total inainte: " << f2.calculeazaTotal() << " EUR" << endl;
+                    cout << "f5 = f2 - 50 EUR (din fiecare serviciu)" << endl;
+                    cout << "f5 total: " << f5.calculeazaTotal() << " EUR" << endl;
+
+                    cout << "\n  3. OPERATOR +=   " << endl;
+                    cout << "f1 total inainte: " << f1.calculeazaTotal() << " EUR" << endl;
+                    f1 += 100.0;  // adaugă 100 EUR la toate serviciile
+                    cout << "f1 total dupa +=100: " << f1.calculeazaTotal() << " EUR" << endl;
+ 
+                    cout << "\n  4. OPERATORI INCREMENT (TVA)   " << endl;
+                    double tvaInainte = Factura::getCotaTVA();
+                    cout << "Cota TVA inainte: " << (tvaInainte * 100) << "%" << endl;
+                    ++f1;  // crește TVA cu 1%
+                    cout << "Cota TVA obiect f1 dupa ++: se modifica doar pentru obiect" << endl;
+
+                    cout << "\n  5. OPERATOR []   " << endl;
+                    cout << "Pret serviciu [0] din f1: " << f1[0] << " EUR" << endl;
+                    cout << "Pret serviciu [1] din f1: " << f1[1] << " EUR" << endl;
+                    cout << "Pret serviciu [2] din f1: " << f1[2] << " EUR" << endl;
+                    cout << "Index invalid [10]: " << f1[10] << " EUR (ar trebui 0)" << endl;
+
+                    cout << "\n  6. OPERATOR () - pret mediu   " << endl;
+                    double pretMediu1 = f1();
+                    cout << "Pret mediu per serviciu f1: " << pretMediu1 << " EUR" << endl;
+                    double pretMediu2 = f2();
+                    cout << "Pret mediu per serviciu f2: " << pretMediu2 << " EUR" << endl;
+
+                    cout << "\n  7. OPERATOR !   " << endl;
+                    cout << "f1 nu este platita (!f1)? " << (!f1 ? "DA" : "NU") << endl;
+                    cout << "f2 nu este platita (!f2)? " << (!f2 ? "DA" : "NU") << endl;
+
+                    cout << "\n  8. OPERATOR CAST LA DOUBLE   " << endl;
+                    double totalCuTVA_f1 = static_cast<double>(f1);
+                    cout << "Cast f1 la double (total cu TVA): " << totalCuTVA_f1 << " EUR" << endl;
+                    double totalCuTVA_f3 = static_cast<double>(f3);
+                    cout << "Cast f3 la double (total cu TVA): " << totalCuTVA_f3 << " EUR" << endl;
+ 
+                    cout << "   TEST OPERATORI FINALIZAT CU SUCCES!" << endl;
+                    break;
+                }
+                 
+                      // SUB-CASE 2: ANALIZA COMPARATIVA
+                     
+                case 2: {
+                     
+                    cout << "   ANALIZA COMPARATIVA INTRE CLASE" << endl;
+                   
+
+                    // Creează seturi de date pentru comparație
+                    ClientCorporativ c1("Transport Express SRL", "Bucuresti", "Contact1",
+                        100, "RO11111111", 5000.0, true);
+                    ClientCorporativ c2("Logistics Pro SRL", "Cluj", "Contact2",
+                        50, "RO22222222", 2000.0, true);
+
+                    CursaInternationala cr1("Romania", "Germania", 2000.0, 20.0, 50, "SOF-101", "01/12/24");
+                    CursaInternationala cr2("Romania", "Franta", 2500.0, 25.0, 60, "SOF-102", "02/12/24");
+
+                    double p1[] = { 1000.0, 500.0, 300.0 };
+                    double p2[] = { 2000.0, 1000.0, 500.0 };
+                    Factura f1("F-001", "01/12/24", "Client A", p1, 3, "EUR", false);
+                    Factura f2("F-002", "02/12/24", "Client B", p2, 3, "EUR", false);
+
+                    cout << "\n RAPORT COMPARATIV DETALIAT " << endl;
+
+                    //   COMPARARE CLIENTI  
+                    cout << "\n COMPARARE CLIENTI " << endl;
+                    cout << "\nClient 1:" << endl;
+                    cout << "  Nume: " << c1.getNumeCompanie() << endl;
+                    cout << "  Angajati: " << c1.getNrAngajati() << endl;
+                    cout << "  Volum: " << c1.getVolumTransporturiLunar() << " tone" << endl;
+
+                    cout << "\nClient 2:" << endl;
+                    cout << "  Nume: " << c2.getNumeCompanie() << endl;
+                    cout << "  Angajati: " << c2.getNrAngajati() << endl;
+                    cout << "  Volum: " << c2.getVolumTransporturiLunar() << " tone" << endl;
+
+                    cout << "\nANALIZA:" << endl;
+                    cout << "  Egalitate volum (c1 == c2): " << (c1 == c2 ? "DA" : "NU") << endl;
+                    cout << "  Client 1 > Client 2: " << (c1 > c2 ? "DA" : "NU") << endl;
+                    cout << "  Diferenta volum: " << abs(c1.getVolumTransporturiLunar() - c2.getVolumTransporturiLunar())
+                        << " tone" << endl;
+                    cout << "  Diferenta angajati: " << abs(c1.getNrAngajati() - c2.getNrAngajati()) << endl;
+                    cout << "  Raport angajati C1:C2 = " << ((double)c1.getNrAngajati() / c2.getNrAngajati()) << ":1" << endl;
+                    cout << "  Raport volum C1:C2 = " << (c1.getVolumTransporturiLunar() / c2.getVolumTransporturiLunar()) << ":1" << endl;
+
+                    // Calcule financiare
+                    double pretStandard = 10000.0;
+                    double pretFinal1 = ClientCorporativ::calculeazaPretFinal(pretStandard, c1.getVolumTransporturiLunar());
+                    double pretFinal2 = ClientCorporativ::calculeazaPretFinal(pretStandard, c2.getVolumTransporturiLunar());
+
+                    cout << "\n  ANALIZA FINANCIARA (pentru pret standard " << pretStandard << " EUR):" << endl;
+                    cout << "  Pret final Client 1: " << pretFinal1 << " EUR (discount: " << (pretStandard - pretFinal1) << " EUR)" << endl;
+                    cout << "  Pret final Client 2: " << pretFinal2 << " EUR (discount: " << (pretStandard - pretFinal2) << " EUR)" << endl;
+                    cout << "  Diferenta preturi finale: " << abs(pretFinal1 - pretFinal2) << " EUR" << endl;
+
+                    //   COMPARARE CURSE  
+                    cout << "\n  COMPARARE CURSE  " << endl;
+                    cout << "\nCursa 1:" << endl;
+
+                    cout << "  Cod: " << cr1.getCodCursa() << endl;
+                    cout << "  Ruta: " << cr1.getTaraOrigine() << " -> " << cr1.getTaraDestinatie() << endl;
+                    cout << "  Distanta: " << cr1.getDistantaKm() << " km" << endl;
+                    cout << "  Durata: " << cr1.getDurataTimpOre() << " ore" << endl;
+                    cout << "  Colete: " << cr1.getNrColete() << endl;
+
+                    cout << "\nCursa 2:" << endl;
+                    cout << "  Cod: " << cr2.getCodCursa() << endl;
+                    cout << "  Ruta: " << cr2.getTaraOrigine() << " -> " << cr2.getTaraDestinatie() << endl;
+                    cout << "  Distanta: " << cr2.getDistantaKm() << " km" << endl;
+                    cout << "  Durata: " << cr2.getDurataTimpOre() << " ore" << endl;
+                    cout << "  Colete: " << cr2.getNrColete() << endl;
+
+                    cout << "\nANALIZA:" << endl;
+                    cout << "  Egalitate distanta (cr1 == cr2): " << (cr1 == cr2 ? "DA" : "NU") << endl;
+                    cout << "  Cursa 1 < Cursa 2: " << (cr1 < cr2 ? "DA" : "NU") << endl;
+                    cout << "  Diferenta distanta: " << abs(cr1.getDistantaKm() - cr2.getDistantaKm()) << " km" << endl;
+                    cout << "  Diferenta durata: " << abs(cr1.getDurataTimpOre() - cr2.getDurataTimpOre()) << " ore" << endl;
+                    cout << "  Diferenta colete: " << abs(cr1.getNrColete() - cr2.getNrColete()) << endl;
+
+                    double viteza1 = cr1();  // operator ()
+                    double viteza2 = cr2();
+                    cout << "  Viteza medie Cursa 1: " << viteza1 << " km/h" << endl;
+                    cout << "  Viteza medie Cursa 2: " << viteza2 << " km/h" << endl;
+                    cout << "  Diferenta viteze: " << abs(viteza1 - viteza2) << " km/h" << endl;
+
+                    // Calcule costuri
+                    double cost1 = CursaInternationala::calculeazaCostTotalCursa(cr1.getDistantaKm(), cr1.getNrColete(), false);
+                    double cost2 = CursaInternationala::calculeazaCostTotalCursa(cr2.getDistantaKm(), cr2.getNrColete(), false);
+
+                    cout << "\n  ANALIZA COSTURI:" << endl;
+                    cout << "  Cost total Cursa 1: " << cost1 << " EUR" << endl;
+                    cout << "  Cost total Cursa 2: " << cost2 << " EUR" << endl;
+                    cout << "  Diferenta costuri: " << abs(cost1 - cost2) << " EUR" << endl;
+                    cout << "  Cost/km Cursa 1: " << (cost1 / cr1.getDistantaKm()) << " EUR/km" << endl;
+                    cout << "  Cost/km Cursa 2: " << (cost2 / cr2.getDistantaKm()) << " EUR/km" << endl;
+                    cout << "  Cost/colet Cursa 1: " << (cost1 / cr1.getNrColete()) << " EUR/colet" << endl;
+                    cout << "  Cost/colet Cursa 2: " << (cost2 / cr2.getNrColete()) << " EUR/colet" << endl;
+
+                    //   COMPARARE FACTURI  
+                    cout << "\n COMPARARE FACTURI " << endl;
+                    cout << "\nFactura 1:" << endl;
+                    cout << "  Numar: " << f1.getNumarFactura() << endl;
+                    cout << "  Client: " << f1.getClientDenumire() << endl;
+                    cout << "  Nr. servicii: " << f1.getNrServicii() << endl;
+                    cout << "  Total fara TVA: " << f1.calculeazaTotal() << " EUR" << endl;
+                    cout << "  Total cu TVA: " << static_cast<double>(f1) << " EUR" << endl;
+
+                    cout << "\nFactura 2:" << endl;
+                    cout << "  Numar: " << f2.getNumarFactura() << endl;
+                    cout << "  Client: " << f2.getClientDenumire() << endl;
+                    cout << "  Nr. servicii: " << f2.getNrServicii() << endl;
+                    cout << "  Total fara TVA: " << f2.calculeazaTotal() << " EUR" << endl;
+                    cout << "  Total cu TVA: " << static_cast<double>(f2) << " EUR" << endl;
+
+                    cout << "\nANALIZA:" << endl;
+                    cout << "  Egalitate valoare (f1 == f2): " << (f1 == f2 ? "DA" : "NU") << endl;
+                    cout << "  Factura 1 < Factura 2: " << (f1 < f2 ? "DA" : "NU") << endl;
+                    cout << "  Diferenta fara TVA: " << abs(f1.calculeazaTotal() - f2.calculeazaTotal()) << " EUR" << endl;
+                    cout << "  Diferenta cu TVA: " << abs(static_cast<double>(f1) - static_cast<double>(f2)) << " EUR" << endl;
+                    cout << "  Pret mediu/serviciu F1: " << f1() << " EUR" << endl;
+                    cout << "  Pret mediu/serviciu F2: " << f2() << " EUR" << endl;
+
+                    // SIMULARE SCENARIU BUSINESS 
+                    cout << "\n--- SIMULARE SCENARIU BUSINESS ---" << endl;
+                    cout << "\nScenariu: Clientul 1 face Cursa 1 si primeste Factura 1" << endl;
+                    cout << "          Clientul 2 face Cursa 2 si primeste Factura 2" << endl;
+
+                    cout << "\nClient 1:" << endl;
+                    cout << "  Cost cursa: " << cost1 << " EUR" << endl;
+                    cout << "  Valoare factura (cu TVA): " << static_cast<double>(f1) << " EUR" << endl;
+                    double profit1 = static_cast<double>(f1) - cost1;
+                    cout << "  PROFIT: " << profit1 << " EUR" << endl;
+                    cout << "  Marja profit: " << ((profit1 / static_cast<double>(f1)) * 100) << "%" << endl;
+
+                    cout << "\nClient 2:" << endl;
+                    cout << "  Cost cursa: " << cost2 << " EUR" << endl;
+                    cout << "  Valoare factura (cu TVA): " << static_cast<double>(f2) << " EUR" << endl;
+                    double profit2 = static_cast<double>(f2) - cost2;
+                    cout << "  PROFIT: " << profit2 << " EUR" << endl;
+                    cout << "  Marja profit: " << ((profit2 / static_cast<double>(f2)) * 100) << "%" << endl;
+
+                    cout << "\nCOMPARATIE PROFITABILITATE:" << endl;
+                    cout << "  Diferenta profit: " << abs(profit1 - profit2) << " EUR" << endl;
+                    if (profit1 > profit2) {
+                        cout << "  Client 1 este mai profitabil cu " << ((profit1 / profit2) - 1) * 100 << "%" << endl;
+                    }
+                    else {
+                        cout << "  Client 2 este mai profitabil cu " << ((profit2 / profit1) - 1) * 100 << "%" << endl;
+                    }
+
+                  
+                    cout << "   ANALIZA COMPARATIVA FINALIZATA!" << endl;
+                     
+                    break;
+                }
+
+                      
+                      // SUB-CASE 3: OPERATII AVANSATE MATRICE
+                     
+                case 3: {
+                    
+                    cout << "   OPERATII AVANSATE CU MATRICE" << endl;
+                     
+
+                    const int ROWS = 4;
+                    const int COLS = 3;
+
+                    cout << "Creare matrice " << ROWS << "x" << COLS << " pentru fiecare clasa...\n" << endl;
+
+                    //  MATRICE CLIENTI 
+                    ClientCorporativ matClienti[ROWS][COLS];
+
+                    cout << "--- Populare matrice CLIENTI ---" << endl;
+                    for (int i = 0; i < ROWS; i++) {
+                        for (int j = 0; j < COLS; j++) {
+                            string numeC = "Client[" + to_string(i) + "][" + to_string(j) + "] SRL";
+                            string adresa = "Adresa " + to_string(i) + "-" + to_string(j);
+                            string contact = "Contact " + to_string(i) + "-" + to_string(j);
+                            int angajati = (i + 1) * 15 + (j + 1) * 5;
+                            string cod = "RO" + to_string(10000000 + i * 10000 + j * 1000);
+                            double volum = (i + 1) * 200.0 + (j + 1) * 150.0;
+
+                            matClienti[i][j] = ClientCorporativ(
+                                numeC.c_str(), adresa.c_str(), contact.c_str(),
+                                angajati, cod, volum, true
+                            );
+                        }
+                    }
+                    cout << "✓ Matrice clienti creata!\n" << endl;
+
+                    //  MATRICE CURSE 
+                    CursaInternationala matCurse[ROWS][COLS];
+
+                    cout << "--- Populare matrice CURSE ---" << endl;
+                    string destinatii[] = { "Germania", "Franta", "Italia" };
+                    for (int i = 0; i < ROWS; i++) {
+                        for (int j = 0; j < COLS; j++) {
+                            string dest = destinatii[j % 3];
+                            double distanta = 1000.0 + i * 300 + j * 200;
+                            double durata = 10.0 + i * 2 + j * 3;
+                            int colete = 20 + i * 10 + j * 5;
+                            string sofer = "SOF-" + to_string(100 + i * 10 + j);
+                            string data = to_string(1 + i) + "/12/2024";
+
+                            matCurse[i][j] = CursaInternationala(
+                                "Romania", dest, distanta, durata, colete,
+                                sofer.c_str(), data.c_str()
+                            );
+                        }
+                    }
+                    cout << "✓ Matrice curse creata!\n" << endl;
+
+                    //  AFISARE TABELARA CLIENTI 
+                    cout << " MATRICE CLIENTI - VEDERE TABELARA " << endl;
+                    cout << "Pozitie    | Nume                      | Angajati | Volum (tone)" << endl;
+                    for (int i = 0; i < ROWS; i++) {
+                        for (int j = 0; j < COLS; j++) {
+                            cout << "[" << i << "][" << j << "]     | ";
+                            string nume = matClienti[i][j].getNumeCompanie();
+                            cout << nume.substr(0, 25);
+                            for (size_t k = nume.length(); k < 25; k++) cout << " ";
+                            cout << " | ";
+                            cout << matClienti[i][j].getNrAngajati();
+                            if (matClienti[i][j].getNrAngajati() < 10) cout << "        | ";
+                            else if (matClienti[i][j].getNrAngajati() < 100) cout << "       | ";
+                            else cout << "      | ";
+                            cout << matClienti[i][j].getVolumTransporturiLunar() << endl;
+                        }
+                    }
+                  
+                    //  AFISARE TABELARA CURSE 
+                    cout << " MATRICE CURSE - VEDERE TABELARA " << endl;
+                    
+                    cout << "Pozitie    | Cod          | Destinatie  | Distanta | Colete" << endl;
+                    
+                    for (int i = 0; i < ROWS; i++) {
+                        for (int j = 0; j < COLS; j++) {
+                            cout << "[" << i << "][" << j << "]     | ";
+                            cout << matCurse[i][j].getCodCursa();
+                            string cod = matCurse[i][j].getCodCursa();
+                            for (size_t k = cod.length(); k < 12; k++) cout << " ";
+                            cout << " | ";
+                            cout << matCurse[i][j].getTaraDestinatie();
+                            string dest = matCurse[i][j].getTaraDestinatie();
+                            for (size_t k = dest.length(); k < 11; k++) cout << " ";
+                            cout << " | ";
+                            cout << matCurse[i][j].getDistantaKm();
+                            if (matCurse[i][j].getDistantaKm() < 10000) cout << "    | ";
+                            else cout << "   | ";
+                            cout << matCurse[i][j].getNrColete() << endl;
+                        }
+                    }
+               
+                    //  STATISTICI PE LINII (CLIENTI) 
+                    cout << " STATISTICI PE LINII - CLIENTI " << endl;
+                    for (int i = 0; i < ROWS; i++) {
+                        double volumLinie = 0;
+                        int angajatiLinie = 0;
+                        for (int j = 0; j < COLS; j++) {
+                            volumLinie += matClienti[i][j].getVolumTransporturiLunar();
+                            angajatiLinie += matClienti[i][j].getNrAngajati();
+                        }
+                        cout << "Linia " << i << ": Volum total=" << volumLinie << " tone, "
+                            << "Angajati total=" << angajatiLinie << ", "
+                            << "Volum mediu=" << (volumLinie / COLS) << " tone" << endl;
+                    }
+                    cout << endl;
+
+                    //  STATISTICI PE COLOANE (CURSE)
+                    cout << " STATISTICI PE COLOANE - CURSE " << endl;
+                    for (int j = 0; j < COLS; j++) {
+                        double distantaColoana = 0;
+                        int coleteColoana = 0;
+                        double durataColoana = 0;
+                        for (int i = 0; i < ROWS; i++) {
+                            distantaColoana += matCurse[i][j].getDistantaKm();
+                            coleteColoana += matCurse[i][j].getNrColete();
+                            durataColoana += matCurse[i][j].getDurataTimpOre();
+                        }
+                        cout << "Coloana " << j << ": Distanta total=" << distantaColoana << " km, "
+                            << "Colete total=" << coleteColoana << ", "
+                            << "Viteza medie=" << (distantaColoana / durataColoana) << " km/h" << endl;
+                    }
+                    cout << endl;
+
+                    //  DIAGONALA PRINCIPALA 
+                    cout << " DIAGONALA PRINCIPALA - CLIENTI " << endl;
+                    double volumDiag = 0;
+                    int angajatiDiag = 0;
+                    int minSize = (ROWS < COLS) ? ROWS : COLS;
+
+                    for (int i = 0; i < minSize; i++) {
+                        volumDiag += matClienti[i][i].getVolumTransporturiLunar();
+                        angajatiDiag += matClienti[i][i].getNrAngajati();
+                        cout << "[" << i << "][" << i << "]: " << matClienti[i][i].getNumeCompanie()
+                            << " - Volum: " << matClienti[i][i].getVolumTransporturiLunar() << " tone" << endl;
+                    }
+                    cout << "\nTotal diagonala:" << endl;
+                    cout << "  Volum: " << volumDiag << " tone" << endl;
+                    cout << "  Angajati: " << angajatiDiag << endl;
+                    cout << "  Volum mediu: " << (volumDiag / minSize) << " tone\n" << endl;
+
+                    //  GASIRE ELEMENTE EXTREME - CLIENTI 
+                    cout << "  ELEMENTE EXTREME - CLIENTI  " << endl;
+                    ClientCorporativ* clientMin = &matClienti[0][0];
+                    ClientCorporativ* clientMax = &matClienti[0][0];
+                    int minI = 0, minJ = 0, maxI = 0, maxJ = 0;
+
+                    for (int i = 0; i < ROWS; i++) {
+                        for (int j = 0; j < COLS; j++) {
+                            if (matClienti[i][j] < *clientMin) {  // operator 
+                                clientMin = &matClienti[i][j];
+                                minI = i;
+                                minJ = j;
+                            }
+                            if (matClienti[i][j] > *clientMax) {  // operator >
+                                clientMax = &matClienti[i][j];
+                                maxI = i;
+                                maxJ = j;
+                            }
+                        }
+                    }
+
+                    cout << "Volum MINIM:" << endl;
+                    cout << "  Pozitie: [" << minI << "][" << minJ << "]" << endl;
+                    cout << "  Client: " << clientMin->getNumeCompanie() << endl;
+                    cout << "  Volum: " << clientMin->getVolumTransporturiLunar() << " tone" << endl;
+
+                    cout << "\nVolum MAXIM:" << endl;
+                    cout << "  Pozitie: [" << maxI << "][" << maxJ << "]" << endl;
+                    cout << "  Client: " << clientMax->getNumeCompanie() << endl;
+                    cout << "  Volum: " << clientMax->getVolumTransporturiLunar() << " tone\n" << endl;
+
+                    //  GASIRE ELEMENTE EXTREME - CURSE 
+                    cout << "  ELEMENTE EXTREME - CURSE  " << endl;
+                    double distMin = 999999, distMax = 0;
+                    int posMinI_c = 0, posMinJ_c = 0, posMaxI_c = 0, posMaxJ_c = 0;
+
+                    for (int i = 0; i < ROWS; i++) {
+                        for (int j = 0; j < COLS; j++) {
+                            double d = matCurse[i][j].getDistantaKm();
+                            if (d < distMin) {
+                                distMin = d;
+                                posMinI_c = i;
+                                posMinJ_c = j;
+                            }
+                            if (d > distMax) {
+                                distMax = d;
+                                posMaxI_c = i;
+                                posMaxJ_c = j;
+                            }
+                        }
+                    }
+
+                    cout << "Distanta MINIMA:" << endl;
+                    cout << "  Pozitie: [" << posMinI_c << "][" << posMinJ_c << "]" << endl;
+                    cout << "  Cursa: " << matCurse[posMinI_c][posMinJ_c].getCodCursa() << endl;
+                    cout << "  Distanta: " << distMin << " km" << endl;
+
+                    cout << "\nDistanta MAXIMA:" << endl;
+                    cout << "  Pozitie: [" << posMaxI_c << "][" << posMaxJ_c << "]" << endl;
+                    cout << "  Cursa: " << matCurse[posMaxI_c][posMaxJ_c].getCodCursa() << endl;
+                    cout << "  Distanta: " << distMax << " km\n" << endl;
+
+                    //  STATISTICI GENERALE MATRICE 
+                    cout << " STATISTICI GENERALE MATRICE " << endl;
+
+                    double volumTotalMat = 0;
+                    int angajatiTotalMat = 0;
+                    for (int i = 0; i < ROWS; i++) {
+                        for (int j = 0; j < COLS; j++) {
+                            volumTotalMat += matClienti[i][j].getVolumTransporturiLunar();
+                            angajatiTotalMat += matClienti[i][j].getNrAngajati();
+                        }
+                    }
+
+                    cout << "MATRICE CLIENTI (" << ROWS << "x" << COLS << "):" << endl;
+                    cout << "  Elemente totale: " << (ROWS * COLS) << endl;
+                    cout << "  Volum total: " << volumTotalMat << " tone" << endl;
+                    cout << "  Angajati total: " << angajatiTotalMat << endl;
+                    cout << "  Volum mediu: " << (volumTotalMat / (ROWS * COLS)) << " tone/client" << endl;
+                    cout << "  Angajati mediu: " << (angajatiTotalMat / (ROWS * COLS)) << " angajati/client" << endl;
+
+                    double distTotalMat = 0;
+                    int coleteTotalMat = 0;
+                    double durataTotalMat = 0;
+                    for (int i = 0; i < ROWS; i++) {
+                        for (int j = 0; j < COLS; j++) {
+                            distTotalMat += matCurse[i][j].getDistantaKm();
+                            coleteTotalMat += matCurse[i][j].getNrColete();
+                            durataTotalMat += matCurse[i][j].getDurataTimpOre();
+                        }
+                    }
+
+                    cout << "\nMATRICE CURSE (" << ROWS << "x" << COLS << "):" << endl;
+                    cout << "  Elemente totale: " << (ROWS * COLS) << endl;
+                    cout << "  Distanta totala: " << distTotalMat << " km" << endl;
+                    cout << "  Colete totale: " << coleteTotalMat << endl;
+                    cout << "  Durata totala: " << durataTotalMat << " ore" << endl;
+                    cout << "  Distanta medie: " << (distTotalMat / (ROWS * COLS)) << " km/cursa" << endl;
+                    cout << "  Viteza medie generala: " << (distTotalMat / durataTotalMat) << " km/h" << endl;
+
+                  
+                    cout << "   OPERATII MATRICE FINALIZATE!" << endl;
+                  
+                    break;
+                }
+
+                case 0:
+                    cout << "\nRevenire la meniul principal..." << endl;
+                    break;
+
+                default:
+                    cout << "\n⚠️  Optiune invalida! Incercati din nou." << endl;
+                }
+
+            } while (subOptiune != 0);
             break;
         }
 
