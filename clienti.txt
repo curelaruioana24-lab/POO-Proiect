@@ -1,0 +1,30 @@
+--- CLIENT CORPORATIV ---
+ID: 1
+Companie: test
+Adresa: str lacului nr 178 bucuresti
+Contact: ion
+Angajati: 100
+Cod Fiscal: Ro2894629
+Volum Lunar: 30
+Activ: DA
+-------------------------
+--- CLIENT CORPORATIV ---
+ID: 1
+Companie: test
+Adresa: str lacului nr 178 bucuresti
+Contact: ion
+Angajati: 100
+Cod Fiscal: Ro2894629
+Volum Lunar: 30
+Activ: DA
+-------------------------
+--- CLIENT CORPORATIV ---
+ID: 2
+Companie: test123
+Adresa: str padurii nr 56 pantelimon
+Contact: maria
+Angajati: 100
+Cod Fiscal: Ro7482642
+Volum Lunar: 50
+Activ: DA
+-------------------------

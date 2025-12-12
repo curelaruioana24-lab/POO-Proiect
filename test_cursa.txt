@@ -1,0 +1,11 @@
+--- CURSA INTERNATIONALA ---
+Cod: CURS-1
+Origine: Romania
+Destinatie: Germania
+Distanta: 2000 km
+Durata: 24 ore
+Colete: 40
+Sofer: SOF-999
+Data: 01/01/2025
+Finalizata: NU
+----------------------------

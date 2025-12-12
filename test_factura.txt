@@ -1,0 +1,10 @@
+--- FACTURA ---
+Numar: FACT-TEST
+Data: 01/01/2025
+Client: FileTest SRL
+Nr. Servicii: 2
+  Serviciu 1: 1000
+  Serviciu 2: 500
+Total: 1500 EUR
+Platita: NU
+---------------

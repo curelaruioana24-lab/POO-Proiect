@@ -1,0 +1,10 @@
+--- CLIENT CORPORATIV ---
+ID: 3
+Companie: FileTest SRL
+Adresa: Adresa Test
+Contact: Contact Test
+Angajati: 50
+Cod Fiscal: RO12345678
+Volum Lunar: 1500
+Activ: DA
+-------------------------

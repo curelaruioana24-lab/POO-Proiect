@@ -4,6 +4,7 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <fstream>
 using namespace std;
 
 //
@@ -1337,12 +1338,1097 @@ void afiseazaRaportFactura(const Factura& factura) {
 }
 
 //
+// CLASA 4: ComandaTransport - FAZA 5 (relatii has-a cu celelalte clase)
+//
+class ComandaTransport {
+private:
+    char* numarComanda;
+    string dataComanda;
+
+    // RELATII HAS-A cu celelalte clase
+    ClientCorporativ* client;              // Pointer la client (has-a)
+    CursaInternationala cursaPrincipala;   // Obiect cursa (has-a)
+    Factura* factura;                      // Pointer la factura (has-a)
+    vector<CursaInternationala*> curseAditionale;  // Vector de pointeri (has-a)
+
+    char* observatii;
+    bool esteFinalizata;
+    double valoareTotala;
+    int ID_COMANDA;
+
+    static int numarTotalComenzi;
+    static double incasariTotale;
+
+public:
+    // Constructor fara parametri
+    ComandaTransport()
+        : numarComanda(nullptr),
+        dataComanda("01/01/2024"),
+        client(nullptr),
+        cursaPrincipala(),
+        factura(nullptr),
+        observatii(nullptr),
+        esteFinalizata(false),
+        valoareTotala(0.0),
+        ID_COMANDA(++numarTotalComenzi) {
+
+        numarComanda = new char[50];
+        strcpy(numarComanda, "CMD-000");
+
+        observatii = new char[500];
+        strcpy(observatii, "Fara observatii");
+    }
+
+    // Constructor cu parametri
+    ComandaTransport(const char* numar, string data, ClientCorporativ* cli,
+        const CursaInternationala& cursa, Factura* fact, const char* obs)
+        : numarComanda(nullptr),
+        dataComanda(data),
+        client(cli),
+        cursaPrincipala(cursa),
+        factura(fact),
+        observatii(nullptr),
+        esteFinalizata(false),
+        valoareTotala(0.0),
+        ID_COMANDA(++numarTotalComenzi) {
+
+        size_t len = strlen(numar);
+        numarComanda = new char[len + 1];
+        strcpy(numarComanda, numar);
+
+        len = strlen(obs);
+        observatii = new char[len + 1];
+        strcpy(observatii, obs);
+
+        calculeazaValoareTotala();
+    }
+
+    // Constructor de copiere
+    ComandaTransport(const ComandaTransport& c)
+        : numarComanda(nullptr),
+        dataComanda(c.dataComanda),
+        client(c.client),
+        cursaPrincipala(c.cursaPrincipala),
+        factura(c.factura),
+        observatii(nullptr),
+        esteFinalizata(c.esteFinalizata),
+        valoareTotala(c.valoareTotala),
+        ID_COMANDA(c.ID_COMANDA) {
+
+        if (c.numarComanda) {
+            size_t len = strlen(c.numarComanda);
+            numarComanda = new char[len + 1];
+            strcpy(numarComanda, c.numarComanda);
+        }
+
+        if (c.observatii) {
+            size_t len = strlen(c.observatii);
+            observatii = new char[len + 1];
+            strcpy(observatii, c.observatii);
+        }
+
+        // Copiere vector de pointeri (shallow copy)
+        curseAditionale = c.curseAditionale;
+    }
+
+    // Destructor
+    ~ComandaTransport() {
+        delete[] numarComanda;
+        delete[] observatii;
+        // Nu stergem pointerii client si factura - sunt gestionate extern
+        // Nu stergem cursele din vector - sunt gestionate extern
+    }
+
+    // Operator de atribuire
+    ComandaTransport& operator=(const ComandaTransport& c) {
+        if (this != &c) {
+            delete[] numarComanda;
+            delete[] observatii;
+
+            if (c.numarComanda) {
+                size_t len = strlen(c.numarComanda);
+                numarComanda = new char[len + 1];
+                strcpy(numarComanda, c.numarComanda);
+            }
+
+            if (c.observatii) {
+                size_t len = strlen(c.observatii);
+                observatii = new char[len + 1];
+                strcpy(observatii, c.observatii);
+            }
+
+            dataComanda = c.dataComanda;
+            client = c.client;
+            cursaPrincipala = c.cursaPrincipala;
+            factura = c.factura;
+            curseAditionale = c.curseAditionale;
+            esteFinalizata = c.esteFinalizata;
+            valoareTotala = c.valoareTotala;
+            ID_COMANDA = c.ID_COMANDA;
+        }
+        return *this;
+    }
+
+    // GETTERI
+    const char* getNumarComanda() const { return numarComanda; }
+    string getDataComanda() const { return dataComanda; }
+    ClientCorporativ* getClient() const { return client; }
+    CursaInternationala getCursaPrincipala() const { return cursaPrincipala; }
+    Factura* getFactura() const { return factura; }
+    const char* getObservatii() const { return observatii; }
+    bool getEsteFinalizata() const { return esteFinalizata; }
+    double getValoareTotala() const { return valoareTotala; }
+    int getID() const { return ID_COMANDA; }
+    const vector<CursaInternationala*>& getCurseAditionale() const { return curseAditionale; }
+
+    // SETTERI
+    void setNumarComanda(const char* numar) {
+        if (numar != nullptr) {
+            delete[] numarComanda;
+            size_t len = strlen(numar);
+            numarComanda = new char[len + 1];
+            strcpy(numarComanda, numar);
+        }
+    }
+
+    void setDataComanda(string data) {
+        dataComanda = data;
+    }
+
+    void setClient(ClientCorporativ* cli) {
+        client = cli;
+    }
+
+    void setCursaPrincipala(const CursaInternationala& cursa) {
+        cursaPrincipala = cursa;
+    }
+
+    void setFactura(Factura* fact) {
+        factura = fact;
+    }
+
+    void setObservatii(const char* obs) {
+        if (obs != nullptr) {
+            delete[] observatii;
+            size_t len = strlen(obs);
+            observatii = new char[len + 1];
+            strcpy(observatii, obs);
+        }
+    }
+
+    void setEsteFinalizata(bool finalizata) {
+        esteFinalizata = finalizata;
+        if (finalizata) {
+            incasariTotale += valoareTotala;
+        }
+    }
+
+    // Adauga cursa aditionala la comanda
+    void adaugaCursaAditionala(CursaInternationala* cursa) {
+        if (cursa != nullptr) {
+            curseAditionale.push_back(cursa);
+            calculeazaValoareTotala();
+        }
+    }
+
+    // Calculeaza valoarea totala a comenzii
+    void calculeazaValoareTotala() {
+        valoareTotala = 0.0;
+
+        // Cost cursa principala
+        double costPrincipala = CursaInternationala::calculeazaCostTotalCursa(
+            cursaPrincipala.getDistantaKm(),
+            cursaPrincipala.getNrColete(),
+            false
+        );
+        valoareTotala += costPrincipala;
+
+        // Cost curse aditionale
+        for (auto cursa : curseAditionale) {
+            double cost = CursaInternationala::calculeazaCostTotalCursa(
+                cursa->getDistantaKm(),
+                cursa->getNrColete(),
+                false
+            );
+            valoareTotala += cost;
+        }
+
+        // Aplica discount daca clientul are volum mare
+        if (client != nullptr) {
+            double volumClient = client->getVolumTransporturiLunar();
+            if (volumClient > 5000) {
+                valoareTotala *= 0.90;  // 10% discount
+            }
+            else if (volumClient > 2000) {
+                valoareTotala *= 0.95;  // 5% discount
+            }
+        }
+    }
+
+    // OPERATORI - FAZA 5 (minim 3)
+
+    // 1. Operator + (adauga o cursa aditionala)
+    ComandaTransport operator+(CursaInternationala* cursa) const {
+        ComandaTransport temp(*this);
+        temp.adaugaCursaAditionala(cursa);
+        return temp;
+    }
+
+    // 2. Operator == (compara doua comenzi dupa valoare)
+    bool operator==(const ComandaTransport& c) const {
+        return valoareTotala == c.valoareTotala;
+    }
+
+    // 3. Operator < (compara dupa valoare)
+    bool operator<(const ComandaTransport& c) const {
+        return valoareTotala < c.valoareTotala;
+    }
+
+    // 4. Operator [] (returneaza cursa aditionala la index)
+    CursaInternationala* operator[](int index) const {
+        if (index >= 0 && index < (int)curseAditionale.size()) {
+            return curseAditionale[index];
+        }
+        return nullptr;
+    }
+
+    // 5. Operator cast la double (returneaza valoarea totala)
+    explicit operator double() const {
+        return valoareTotala;
+    }
+
+    // Metode statice
+    static int getNumarTotalComenzi() { return numarTotalComenzi; }
+    static double getIncasariTotale() { return incasariTotale; }
+
+    // Metoda de afisare
+    void afiseaza() const {
+        cout << "\n" << endl;
+        cout << "          COMANDA TRANSPORT #" << ID_COMANDA << endl;
+        cout << "" << endl;
+        cout << "Numar comanda: " << numarComanda << endl;
+        cout << "Data: " << dataComanda << endl;
+
+        if (client != nullptr) {
+            cout << "\n CLIENT " << endl;
+            cout << "Companie: " << client->getNumeCompanie() << endl;
+            cout << "Cod fiscal: " << client->getCodFiscal() << endl;
+            cout << "Volum lunar: " << client->getVolumTransporturiLunar() << " tone" << endl;
+        }
+        else {
+            cout << "\n CLIENT: Nu este asociat " << endl;
+        }
+
+        cout << "\n CURSA PRINCIPALA " << endl;
+        cout << "Cod: " << cursaPrincipala.getCodCursa() << endl;
+        cout << "Ruta: " << cursaPrincipala.getTaraOrigine() << " -> "
+            << cursaPrincipala.getTaraDestinatie() << endl;
+        cout << "Distanta: " << cursaPrincipala.getDistantaKm() << " km" << endl;
+        cout << "Colete: " << cursaPrincipala.getNrColete() << endl;
+
+        if (!curseAditionale.empty()) {
+            cout << "\n  CURSE ADITIONALE (" << curseAditionale.size() << ") " << endl;
+            for (size_t i = 0; i < curseAditionale.size(); i++) {
+                cout << (i + 1) << ". " << curseAditionale[i]->getCodCursa()
+                    << " - " << curseAditionale[i]->getTaraDestinatie()
+                    << " (" << curseAditionale[i]->getDistantaKm() << " km)" << endl;
+            }
+        }
+
+        if (factura != nullptr) {
+            cout << "\n FACTURA " << endl;
+            cout << "Numar: " << factura->getNumarFactura() << endl;
+            cout << "Total factura: " << factura->calculeazaTotal() << " "
+                << factura->getMoneda() << endl;
+            cout << "Status plata: " << (factura->getEstePlatita() ? "PLATITA" : "NEPLATITA") << endl;
+        }
+        else {
+            cout << "\n FACTURA: Nu este asociata " << endl;
+        }
+
+        cout << "\n  DETALII COMANDA " << endl;
+        cout << "Valoare totala: " << valoareTotala << " EUR" << endl;
+        cout << "Observatii: " << observatii << endl;
+        cout << "Status: " << (esteFinalizata ? "FINALIZATA" : "IN CURS") << endl;
+        cout << "\n" << endl;
+    }
+
+    // Operatori friend
+    friend ostream& operator<<(ostream& out, const ComandaTransport& cmd);
+    friend istream& operator>>(istream& in, ComandaTransport& cmd);
+};
+
+// Initializare membri statici
+int ComandaTransport::numarTotalComenzi = 0;
+double ComandaTransport::incasariTotale = 0.0;
+
+// Operator 
+ostream& operator<<(ostream& out, const ComandaTransport& cmd) {
+    out << "\n═══ COMANDA #" << cmd.ID_COMANDA << " ═══" << endl;
+    out << "Numar: " << cmd.numarComanda << endl;
+    out << "Data: " << cmd.dataComanda << endl;
+
+    if (cmd.client != nullptr) {
+        out << "Client: " << cmd.client->getNumeCompanie() << endl;
+    }
+
+    out << "Cursa principala: " << cmd.cursaPrincipala.getCodCursa() << endl;
+    out << "Curse aditionale: " << cmd.curseAditionale.size() << endl;
+    out << "Valoare: " << cmd.valoareTotala << " EUR" << endl;
+    out << "Status: " << (cmd.esteFinalizata ? "FINALIZATA" : "IN CURS") << endl;
+
+    return out;
+}
+
+// Operator >>
+istream& operator>>(istream& in, ComandaTransport& cmd) {
+    cout << "Numar comanda: ";
+    char buffer[200];
+    in.getline(buffer, 200);
+    cmd.setNumarComanda(buffer);
+
+    cout << "Data comanda (DD/MM/YYYY): ";
+    string data;
+    getline(in, data);
+    cmd.setDataComanda(data);
+
+    cout << "Observatii: ";
+    in.getline(buffer, 500);
+    cmd.setObservatii(buffer);
+
+    return in;
+}
+
+
+
+//  FAZA 6 - METODE PENTRU LUCRU CU FISIERE TEXT SI BINARE
+//  CLIENTCORPORATIV - METODE FISIERE
+
+
+class ClientCorporativFileManager {
+public:
+    // FISIER TEXT - SCRIERE
+    static void salvareTextClient(const ClientCorporativ& client, const char* numeFisier) {
+        ofstream f(numeFisier, ios::app);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        f << " CLIENT CORPORATIV " << endl;
+        f << "ID: " << client.getID() << endl;
+        f << "Companie: " << client.getNumeCompanie() << endl;
+        f << "Adresa: " << client.getAdresaSediu() << endl;
+        f << "Contact: " << client.getPersoanaContact() << endl;
+        f << "Angajati: " << client.getNrAngajati() << endl;
+        f << "Cod Fiscal: " << client.getCodFiscal() << endl;
+        f << "Volum Lunar: " << client.getVolumTransporturiLunar() << endl;
+        f << "Activ: " << (client.getEsteActiv() ? "DA" : "NU") << endl;
+        f << "" << endl;
+
+        f.close();
+        cout << "✓ Client salvat in fisier text: " << numeFisier << endl;
+    }
+
+    // FISIER TEXT - CITIRE
+    static void citireTextClient(const char* numeFisier) {
+        ifstream f(numeFisier);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        cout << "\n CONTINUT FISIER TEXT CLIENTI " << endl;
+        string linie;
+        while (getline(f, linie)) {
+            cout << linie << endl;
+        }
+
+        f.close();
+    }
+
+    // FISIER BINAR - SCRIERE
+    static void salvareBinarClient(const ClientCorporativ& client, const char* numeFisier) {
+        ofstream f(numeFisier, ios::binary | ios::app);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        // Salvare ID
+        int id = client.getID();
+        f.write((char*)&id, sizeof(int));
+
+        // Salvare nume companie
+        int len = strlen(client.getNumeCompanie());
+        f.write((char*)&len, sizeof(int));
+        f.write(client.getNumeCompanie(), len);
+
+        // Salvare adresa
+        len = strlen(client.getAdresaSediu());
+        f.write((char*)&len, sizeof(int));
+        f.write(client.getAdresaSediu(), len);
+
+        // Salvare contact
+        len = strlen(client.getPersoanaContact());
+        f.write((char*)&len, sizeof(int));
+        f.write(client.getPersoanaContact(), len);
+
+        // Salvare numar angajati
+        int angajati = client.getNrAngajati();
+        f.write((char*)&angajati, sizeof(int));
+
+        // Salvare cod fiscal
+        string codFiscal = client.getCodFiscal();
+        len = codFiscal.length();
+        f.write((char*)&len, sizeof(int));
+        f.write(codFiscal.c_str(), len);
+
+        // Salvare volum
+        double volum = client.getVolumTransporturiLunar();
+        f.write((char*)&volum, sizeof(double));
+
+        // Salvare activ
+        bool activ = client.getEsteActiv();
+        f.write((char*)&activ, sizeof(bool));
+
+        f.close();
+        cout << "✓ Client salvat in fisier binar: " << numeFisier << endl;
+    }
+
+    // FISIER BINAR - CITIRE
+    static void citireBinarClient(const char* numeFisier) {
+        ifstream f(numeFisier, ios::binary);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        cout << "\n CITIRE FISIER BINAR CLIENTI " << endl;
+        int nrClienti = 0;
+
+        while (f.peek() != EOF) {
+            nrClienti++;
+            cout << "\n Client #" << nrClienti << " " << endl;
+
+            // Citire ID
+            int id;
+            f.read((char*)&id, sizeof(int));
+            cout << "ID: " << id << endl;
+
+            // Citire nume companie
+            int len;
+            f.read((char*)&len, sizeof(int));
+            char* buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Companie: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire adresa
+            f.read((char*)&len, sizeof(int));
+            buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Adresa: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire contact
+            f.read((char*)&len, sizeof(int));
+            buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Contact: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire angajati
+            int angajati;
+            f.read((char*)&angajati, sizeof(int));
+            cout << "Angajati: " << angajati << endl;
+
+            // Citire cod fiscal
+            f.read((char*)&len, sizeof(int));
+            buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Cod Fiscal: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire volum
+            double volum;
+            f.read((char*)&volum, sizeof(double));
+            cout << "Volum: " << volum << endl;
+
+            // Citire activ
+            bool activ;
+            f.read((char*)&activ, sizeof(bool));
+            cout << "Activ: " << (activ ? "DA" : "NU") << endl;
+        }
+
+        f.close();
+        cout << "\nTotal clienti cititi: " << nrClienti << endl;
+    }
+};
+
+
+//  CURSAINTERNATIONALA - METODE FISIERE
+
+
+class CursaInternationalaFileManager {
+public:
+    
+    static void salvareTextCursa(const CursaInternationala& cursa, const char* numeFisier) {
+        ofstream f(numeFisier, ios::app);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        f << " CURSA INTERNATIONALA " << endl;
+        f << "Cod: " << cursa.getCodCursa() << endl;
+        f << "Origine: " << cursa.getTaraOrigine() << endl;
+        f << "Destinatie: " << cursa.getTaraDestinatie() << endl;
+        f << "Distanta: " << cursa.getDistantaKm() << " km" << endl;
+        f << "Durata: " << cursa.getDurataTimpOre() << " ore" << endl;
+        f << "Colete: " << cursa.getNrColete() << endl;
+        f << "Sofer: " << cursa.getSoferId() << endl;
+        f << "Data: " << cursa.getDataPlecarii() << endl;
+        f << "Finalizata: " << (cursa.getEsteFinalizata() ? "DA" : "NU") << endl;
+        f << "" << endl;
+
+        f.close();
+        cout << "✓ Cursa salvata in fisier text: " << numeFisier << endl;
+    }
+
+    // FISIER TEXT - CITIRE
+    static void citireTextCursa(const char* numeFisier) {
+        ifstream f(numeFisier);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        cout << "\n CONTINUT FISIER TEXT CURSE " << endl;
+        string linie;
+        while (getline(f, linie)) {
+            cout << linie << endl;
+        }
+
+        f.close();
+    }
+
+    // FISIER BINAR - SCRIERE
+    static void salvareBinarCursa(const CursaInternationala& cursa, const char* numeFisier) {
+        ofstream f(numeFisier, ios::binary | ios::app);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        // Salvare cod cursa
+        string cod = cursa.getCodCursa();
+        int len = cod.length();
+        f.write((char*)&len, sizeof(int));
+        f.write(cod.c_str(), len);
+
+        // Salvare origine
+        len = strlen(cursa.getTaraOrigine());
+        f.write((char*)&len, sizeof(int));
+        f.write(cursa.getTaraOrigine(), len);
+
+        // Salvare destinatie
+        string dest = cursa.getTaraDestinatie();
+        len = dest.length();
+        f.write((char*)&len, sizeof(int));
+        f.write(dest.c_str(), len);
+
+        // Salvare distanta
+        double distanta = cursa.getDistantaKm();
+        f.write((char*)&distanta, sizeof(double));
+
+        // Salvare durata
+        double durata = cursa.getDurataTimpOre();
+        f.write((char*)&durata, sizeof(double));
+
+        // Salvare colete
+        int colete = cursa.getNrColete();
+        f.write((char*)&colete, sizeof(int));
+
+        // Salvare sofer
+        len = strlen(cursa.getSoferId());
+        f.write((char*)&len, sizeof(int));
+        f.write(cursa.getSoferId(), len);
+
+        // Salvare data
+        len = strlen(cursa.getDataPlecarii());
+        f.write((char*)&len, sizeof(int));
+        f.write(cursa.getDataPlecarii(), len);
+
+        // Salvare finalizata
+        bool finalizata = cursa.getEsteFinalizata();
+        f.write((char*)&finalizata, sizeof(bool));
+
+        f.close();
+        cout << "✓ Cursa salvata in fisier binar: " << numeFisier << endl;
+    }
+
+    // FISIER BINAR - CITIRE
+    static void citireBinarCursa(const char* numeFisier) {
+        ifstream f(numeFisier, ios::binary);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        cout << "\n CITIRE FISIER BINAR CURSE " << endl;
+        int nrCurse = 0;
+
+        while (f.peek() != EOF) {
+            nrCurse++;
+            cout << "\n Cursa #" << nrCurse << " " << endl;
+
+            // Citire cod
+            int len;
+            f.read((char*)&len, sizeof(int));
+            char* buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Cod: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire origine
+            f.read((char*)&len, sizeof(int));
+            buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Origine: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire destinatie
+            f.read((char*)&len, sizeof(int));
+            buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Destinatie: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire distanta
+            double distanta;
+            f.read((char*)&distanta, sizeof(double));
+            cout << "Distanta: " << distanta << " km" << endl;
+
+            // Citire durata
+            double durata;
+            f.read((char*)&durata, sizeof(double));
+            cout << "Durata: " << durata << " ore" << endl;
+
+            // Citire colete
+            int colete;
+            f.read((char*)&colete, sizeof(int));
+            cout << "Colete: " << colete << endl;
+
+            // Citire sofer
+            f.read((char*)&len, sizeof(int));
+            buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Sofer: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire data
+            f.read((char*)&len, sizeof(int));
+            buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Data: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire finalizata
+            bool finalizata;
+            f.read((char*)&finalizata, sizeof(bool));
+            cout << "Finalizata: " << (finalizata ? "DA" : "NU") << endl;
+        }
+
+        f.close();
+        cout << "\nTotal curse citite: " << nrCurse << endl;
+    }
+};
+
+
+//  FACTURA - METODE FISIERE
+
+
+class FacturaFileManager {
+public:
+    // FISIER TEXT - SCRIERE
+    static void salvareTextFactura(const Factura& factura, const char* numeFisier) {
+        ofstream f(numeFisier, ios::app);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        f << " FACTURA " << endl;
+        f << "Numar: " << factura.getNumarFactura() << endl;
+        f << "Data: " << factura.getDataEmitere() << endl;
+        f << "Client: " << factura.getClientDenumire() << endl;
+        f << "Nr. Servicii: " << factura.getNrServicii() << endl;
+
+        const double* preturi = factura.getPreturiServicii();
+        for (int i = 0; i < factura.getNrServicii(); i++) {
+            f << "  Serviciu " << (i + 1) << ": " << preturi[i] << endl;
+        }
+
+        f << "Total: " << factura.calculeazaTotal() << " " << factura.getMoneda() << endl;
+        f << "Platita: " << (factura.getEstePlatita() ? "DA" : "NU") << endl;
+        f << "" << endl;
+
+        f.close();
+        cout << "✓ Factura salvata in fisier text: " << numeFisier << endl;
+    }
+
+    // FISIER TEXT - CITIRE
+    static void citireTextFactura(const char* numeFisier) {
+        ifstream f(numeFisier);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        cout << "\n CONTINUT FISIER TEXT FACTURI " << endl;
+        string linie;
+        while (getline(f, linie)) {
+            cout << linie << endl;
+        }
+
+        f.close();
+    }
+
+    // FISIER BINAR - SCRIERE
+    static void salvareBinarFactura(const Factura& factura, const char* numeFisier) {
+        ofstream f(numeFisier, ios::binary | ios::app);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        // Salvare numar factura
+        int len = strlen(factura.getNumarFactura());
+        f.write((char*)&len, sizeof(int));
+        f.write(factura.getNumarFactura(), len);
+
+        // Salvare data
+        string data = factura.getDataEmitere();
+        len = data.length();
+        f.write((char*)&len, sizeof(int));
+        f.write(data.c_str(), len);
+
+        // Salvare client
+        len = strlen(factura.getClientDenumire());
+        f.write((char*)&len, sizeof(int));
+        f.write(factura.getClientDenumire(), len);
+
+        // Salvare moneda
+        len = strlen(factura.getMoneda());
+        f.write((char*)&len, sizeof(int));
+        f.write(factura.getMoneda(), len);
+
+        // Salvare nr servicii si preturi
+        int nrServ = factura.getNrServicii();
+        f.write((char*)&nrServ, sizeof(int));
+
+        const double* preturi = factura.getPreturiServicii();
+        for (int i = 0; i < nrServ; i++) {
+            f.write((char*)&preturi[i], sizeof(double));
+        }
+
+        // Salvare platita
+        bool platita = factura.getEstePlatita();
+        f.write((char*)&platita, sizeof(bool));
+
+        f.close();
+        cout << "✓ Factura salvata in fisier binar: " << numeFisier << endl;
+    }
+
+    // FISIER BINAR - CITIRE
+    static void citireBinarFactura(const char* numeFisier) {
+        ifstream f(numeFisier, ios::binary);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        cout << "\n CITIRE FISIER BINAR FACTURI " << endl;
+        int nrFacturi = 0;
+
+        while (f.peek() != EOF) {
+            nrFacturi++;
+            cout << "\n Factura #" << nrFacturi << " " << endl;
+
+            // Citire numar
+            int len;
+            f.read((char*)&len, sizeof(int));
+            char* buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Numar: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire data
+            f.read((char*)&len, sizeof(int));
+            buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Data: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire client
+            f.read((char*)&len, sizeof(int));
+            buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Client: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire moneda
+            f.read((char*)&len, sizeof(int));
+            buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Moneda: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire servicii
+            int nrServ;
+            f.read((char*)&nrServ, sizeof(int));
+            cout << "Nr. Servicii: " << nrServ << endl;
+
+            double total = 0;
+            for (int i = 0; i < nrServ; i++) {
+                double pret;
+                f.read((char*)&pret, sizeof(double));
+                cout << "  Serviciu " << (i + 1) << ": " << pret << endl;
+                total += pret;
+            }
+            cout << "Total: " << total << endl;
+
+            // Citire platita
+            bool platita;
+            f.read((char*)&platita, sizeof(bool));
+            cout << "Platita: " << (platita ? "DA" : "NU") << endl;
+        }
+
+        f.close();
+        cout << "\nTotal facturi citite: " << nrFacturi << endl;
+    }
+};
+
+
+//  COMANDATRANSPORT - METODE FISIERE
+
+class ComandaTransportFileManager {
+public:
+    // FISIER TEXT - SCRIERE
+    static void salvareTextComanda(const ComandaTransport& comanda, const char* numeFisier) {
+        ofstream f(numeFisier, ios::app);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        f << "COMANDA TRANSPORT" << endl;
+        f << "ID: " << comanda.getID() << endl;
+        f << "Numar: " << comanda.getNumarComanda() << endl;
+        f << "Data: " << comanda.getDataComanda() << endl;
+
+        if (comanda.getClient() != nullptr) {
+            f << "Client: " << comanda.getClient()->getNumeCompanie() << endl;
+        }
+
+        f << "Cursa principala: " << comanda.getCursaPrincipala().getCodCursa() << endl;
+        f << "Curse aditionale: " << comanda.getCurseAditionale().size() << endl;
+
+        for (size_t i = 0; i < comanda.getCurseAditionale().size(); i++) {
+            f << "  Cursa " << (i + 1) << ": " << comanda.getCurseAditionale()[i]->getCodCursa() << endl;
+        }
+
+        f << "Valoare totala: " << comanda.getValoareTotala() << " EUR" << endl;
+        f << "Observatii: " << comanda.getObservatii() << endl;
+        f << "Finalizata: " << (comanda.getEsteFinalizata() ? "DA" : "NU") << endl;
+
+        f.close();
+        cout << "✓ Comanda salvata in fisier text: " << numeFisier << endl;
+    }
+
+    // FISIER TEXT - CITIRE
+    static void citireTextComanda(const char* numeFisier) {
+        ifstream f(numeFisier);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        cout << "\n  CONTINUT FISIER TEXT COMENZI " << endl;
+        string linie;
+        while (getline(f, linie)) {
+            cout << linie << endl;
+        }
+
+        f.close();
+    }
+
+    // FISIER BINAR - SCRIERE
+    static void salvareBinarComanda(const ComandaTransport& comanda, const char* numeFisier) {
+        ofstream f(numeFisier, ios::binary | ios::app);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        // Salvare ID
+        int id = comanda.getID();
+        f.write((char*)&id, sizeof(int));
+
+        // Salvare numar comanda
+        int len = strlen(comanda.getNumarComanda());
+        f.write((char*)&len, sizeof(int));
+        f.write(comanda.getNumarComanda(), len);
+
+        // Salvare data
+        string data = comanda.getDataComanda();
+        len = data.length();
+        f.write((char*)&len, sizeof(int));
+        f.write(data.c_str(), len);
+
+        // Salvare nume client (daca exista)
+        bool areClient = (comanda.getClient() != nullptr);
+        f.write((char*)&areClient, sizeof(bool));
+        if (areClient) {
+            const char* numeClient = comanda.getClient()->getNumeCompanie();
+            len = strlen(numeClient);
+            f.write((char*)&len, sizeof(int));
+            f.write(numeClient, len);
+        }
+
+        // Salvare cod cursa principala
+        string codCursa = comanda.getCursaPrincipala().getCodCursa();
+        len = codCursa.length();
+        f.write((char*)&len, sizeof(int));
+        f.write(codCursa.c_str(), len);
+
+        // Salvare numar curse aditionale
+        int nrCurseAd = comanda.getCurseAditionale().size();
+        f.write((char*)&nrCurseAd, sizeof(int));
+
+        // Salvare valoare
+        double valoare = comanda.getValoareTotala();
+        f.write((char*)&valoare, sizeof(double));
+
+        // Salvare observatii
+        len = strlen(comanda.getObservatii());
+        f.write((char*)&len, sizeof(int));
+        f.write(comanda.getObservatii(), len);
+
+        // Salvare finalizata
+        bool finalizata = comanda.getEsteFinalizata();
+        f.write((char*)&finalizata, sizeof(bool));
+
+        f.close();
+        cout << "✓ Comanda salvata in fisier binar: " << numeFisier << endl;
+    }
+
+    // FISIER BINAR - CITIRE
+    static void citireBinarComanda(const char* numeFisier) {
+        ifstream f(numeFisier, ios::binary);
+        if (!f.is_open()) {
+            cout << "Eroare la deschiderea fisierului " << numeFisier << endl;
+            return;
+        }
+
+        cout << "\n CITIRE FISIER BINAR COMENZI " << endl;
+        int nrComenzi = 0;
+
+        while (f.peek() != EOF) {
+            nrComenzi++;
+            cout << "\n Comanda #" << nrComenzi << " " << endl;
+
+            // Citire ID
+            int id;
+            f.read((char*)&id, sizeof(int));
+            cout << "ID: " << id << endl;
+
+            // Citire numar
+            int len;
+            f.read((char*)&len, sizeof(int));
+            char* buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Numar: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire data
+            f.read((char*)&len, sizeof(int));
+            buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Data: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire client
+            bool areClient;
+            f.read((char*)&areClient, sizeof(bool));
+            if (areClient) {
+                f.read((char*)&len, sizeof(int));
+                buffer = new char[len + 1];
+                f.read(buffer, len);
+                buffer[len] = '\0';
+                cout << "Client: " << buffer << endl;
+                delete[] buffer;
+            }
+
+            // Citire cursa principala
+            f.read((char*)&len, sizeof(int));
+            buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Cursa principala: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire nr curse aditionale
+            int nrCurseAd;
+            f.read((char*)&nrCurseAd, sizeof(int));
+            cout << "Curse aditionale: " << nrCurseAd << endl;
+
+            // Citire valoare
+            double valoare;
+            f.read((char*)&valoare, sizeof(double));
+            cout << "Valoare: " << valoare << " EUR" << endl;
+
+            // Citire observatii
+            f.read((char*)&len, sizeof(int));
+            buffer = new char[len + 1];
+            f.read(buffer, len);
+            buffer[len] = '\0';
+            cout << "Observatii: " << buffer << endl;
+            delete[] buffer;
+
+            // Citire finalizata
+            bool finalizata;
+            f.read((char*)&finalizata, sizeof(bool));
+            cout << "Finalizata: " << (finalizata ? "DA" : "NU") << endl;
+        }
+
+        f.close();
+        cout << "\n Total comenzi citite: " << nrComenzi << endl;
+    }
+};
+
+//
 // FUNCTIA MAIN - CU TESTE PENTRU FAZA 3 (plecand de la FAZA 2)
 //
 int main() {
     cout << "" << endl;
     cout << "  SISTEM MANAGEMENT TRANSPORT" << endl;
-    cout << "  VERSIUNEA COMPLETA - FAZA 3" << endl;
     cout << "\n" << endl;
 
     int optiune;
@@ -1355,6 +2441,7 @@ int main() {
     vector<CursaInternationala> vectorCurse;
     vector<Factura> vectorFacturi;
 
+    vector<ComandaTransport*> comenzi;
 
     do {
         cout << "\n MENIU PRINCIPAL " << endl;
@@ -1394,6 +2481,20 @@ int main() {
         cout << "\n  FAZA 4 - VECTORI SI MATRICE " << endl;
         cout << "29. Test complet Faza 4 (vectori + matrice)" << endl;
         cout << "30. Operatii avansate (submeniu: operatori, comparatie, matrice)" << endl;
+
+        cout << "\n  FAZA 5 - COMENZI TRANSPORT (HAS-A) " << endl;
+        cout << "31. Creare comanda transport noua" << endl;
+        cout << "32. Afisare toate comenzile" << endl;
+        cout << "33. Test complet Faza 5 (relatii has-a)" << endl;
+        cout << "34. Adauga cursa aditionala la comanda" << endl;
+        cout << "35. Finalizare comanda" << endl;
+        cout << "36. Statistici comenzi" << endl;
+        cout << "\n  FAZA 6 - FISIERE TEXT SI BINARE " << endl;
+        cout << "37. Salvare date in fisiere TEXT" << endl;
+        cout << "38. Citire date din fisiere TEXT" << endl;
+        cout << "39. Salvare date in fisiere BINARE" << endl;
+        cout << "40. Citire date din fisiere BINARE" << endl;
+        cout << "41. Test complet Faza 6 (toate fisierele)" << endl;
         cout << "\n0. Iesire" << endl;
         cout << "" << endl;
         cout << "Optiune: ";
@@ -2679,6 +3780,534 @@ int main() {
             break;
         }
 
+        // === COMENZI TRANSPORT - FAZA 5 ===
+        case 31: {
+            cout << "\n=== CREARE COMANDA NOUA ===" << endl;
+
+            if (clienti.empty()) {
+                cout << "Nu exista clienti! Creati mai intai un client." << endl;
+                break;
+            }
+            if (curse.empty()) {
+                cout << "Nu exista curse! Creati mai intai o cursa." << endl;
+                break;
+            }
+
+            // Selectare client
+            cout << "\nClienti disponibili:" << endl;
+            for (size_t i = 0; i < clienti.size(); i++) {
+                cout << (i + 1) << ". " << clienti[i]->getNumeCompanie() << endl;
+            }
+            int idxClient;
+            cout << "Selectati client: ";
+            cin >> idxClient;
+            cin.ignore();
+
+            if (idxClient < 1 || idxClient >(int)clienti.size()) {
+                cout << "Selectie invalida!" << endl;
+                break;
+            }
+
+            // Selectare cursa principala
+            cout << "\nCurse disponibile:" << endl;
+            for (size_t i = 0; i < curse.size(); i++) {
+                cout << (i + 1) << ". " << curse[i]->getCodCursa()
+                    << " - " << curse[i]->getTaraDestinatie() << endl;
+            }
+            int idxCursa;
+            cout << "Selectati cursa principala: ";
+            cin >> idxCursa;
+            cin.ignore();
+
+            if (idxCursa < 1 || idxCursa >(int)curse.size()) {
+                cout << "Selectie invalida!" << endl;
+                break;
+            }
+
+            // Selectare factura (optional)
+            Factura* facturaSelectata = nullptr;
+            if (!facturi.empty()) {
+                cout << "\nFacturi disponibile:" << endl;
+                cout << "0. Fara factura" << endl;
+                for (size_t i = 0; i < facturi.size(); i++) {
+                    cout << (i + 1) << ". " << facturi[i]->getNumarFactura()
+                        << " - " << facturi[i]->getClientDenumire() << endl;
+                }
+                int idxFactura;
+                cout << "Selectati factura (0 pentru fara): ";
+                cin >> idxFactura;
+                cin.ignore();
+
+                if (idxFactura > 0 && idxFactura <= (int)facturi.size()) {
+                    facturaSelectata = facturi[idxFactura - 1];
+                }
+            }
+
+            // Creare comanda
+            char numCmd[50], obs[500];
+            string dataCmd;
+
+            cout << "\nNumar comanda: ";
+            cin.getline(numCmd, 50);
+            cout << "Data comanda (DD/MM/YYYY): ";
+            getline(cin, dataCmd);
+            cout << "Observatii: ";
+            cin.getline(obs, 500);
+
+            ComandaTransport* cmd = new ComandaTransport(
+                numCmd, dataCmd,
+                clienti[idxClient - 1],
+                *curse[idxCursa - 1],
+                facturaSelectata,
+                obs
+            );
+
+            comenzi.push_back(cmd);
+            cout << "\n✓ Comanda creata cu succes!" << endl;
+            cmd->afiseaza();
+            break;
+        }
+
+        case 32: {
+            if (comenzi.empty()) {
+                cout << "\nNu exista comenzi!" << endl;
+            }
+            else {
+                cout << "\n=== TOATE COMENZILE ===" << endl;
+                for (auto cmd : comenzi) {
+                    cmd->afiseaza();
+                }
+            }
+            break;
+        }
+
+        case 33: {
+            cout << "\n" << endl;
+            cout << "TEST COMPLET FAZA 5 - RELATII HAS-A " << endl;
+            cout << "\n" << endl;
+
+            // 1. Creare obiecte pentru test
+            cout << "1. Creare obiecte de test..." << endl;
+
+            ClientCorporativ* clientTest1 = new ClientCorporativ(
+                "MegaTransport SRL", "Bucuresti, Sector 1",
+                "Ion Popescu", 100, "RO99999999", 3000.0, true
+            );
+
+            ClientCorporativ* clientTest2 = new ClientCorporativ(
+                "SuperLogistics SRL", "Cluj-Napoca",
+                "Maria Ionescu", 75, "RO88888888", 2500.0, true
+            );
+
+            CursaInternationala* cursaTest1 = new CursaInternationala(
+                "Romania", "Germania", 2200.0, 25.0, 45, "SOF-201", "20/12/2024"
+            );
+
+            CursaInternationala* cursaTest2 = new CursaInternationala(
+                "Romania", "Franta", 2800.0, 30.0, 50, "SOF-202", "21/12/2024"
+            );
+
+            CursaInternationala* cursaTest3 = new CursaInternationala(
+                "Romania", "Italia", 1900.0, 22.0, 40, "SOF-203", "22/12/2024"
+            );
+
+            double preturiTest[] = { 2000.0, 1500.0, 1000.0 };
+            Factura* facturaTest1 = new Factura(
+                "FACT-TEST-001", "20/12/2024", "MegaTransport SRL",
+                preturiTest, 3, "EUR", false
+            );
+
+            Factura* facturaTest2 = new Factura(
+                "FACT-TEST-002", "21/12/2024", "SuperLogistics SRL",
+                preturiTest, 3, "EUR", false
+            );
+
+            cout << "✓ Obiecte create!\n" << endl;
+
+            // 2. Demonstrare HAS-A cu obiecte
+            cout << "2. TEST: Comanda cu obiect CursaInternationala (has-a)" << endl;
+            ComandaTransport cmd1("CMD-TEST-001", "20/12/2024", clientTest1,
+                *cursaTest1, facturaTest1,
+                "Comanda test cu cursa principala");
+            cmd1.afiseaza();
+
+            // 3. Demonstrare HAS-A cu pointer
+            cout << "3. TEST: Comanda cu pointer la Client (has-a)" << endl;
+            cout << "Clientul comenzii: " << cmd1.getClient()->getNumeCompanie() << endl;
+            cout << "Volum client: " << cmd1.getClient()->getVolumTransporturiLunar() << " tone\n" << endl;
+
+            // 4. Demonstrare HAS-A cu vector de pointeri
+            cout << "4. TEST: Adaugare curse aditionale (vector de pointeri - has-a)" << endl;
+            cout << "Curse aditionale inainte: " << cmd1.getCurseAditionale().size() << endl;
+            cmd1.adaugaCursaAditionala(cursaTest2);
+            cmd1.adaugaCursaAditionala(cursaTest3);
+            cout << "Curse aditionale dupa: " << cmd1.getCurseAditionale().size() << endl;
+            cmd1.afiseaza();
+
+            // 5. Test operatori
+            cout << "5. TEST OPERATORI PE COMANDA" << endl;
+
+            ComandaTransport cmd2("CMD-TEST-002", "21/12/2024", clientTest2,
+                *cursaTest2, facturaTest2,
+                "Comanda test 2");
+
+            cout << "Valoare cmd1: " << static_cast<double>(cmd1) << " EUR" << endl;
+            cout << "Valoare cmd2: " << static_cast<double>(cmd2) << " EUR" << endl;
+            cout << "cmd1 == cmd2 ? " << (cmd1 == cmd2 ? "DA" : "NU") << endl;
+            cout << "cmd1 < cmd2 ? " << (cmd1 < cmd2 ? "DA" : "NU") << endl;
+
+            cout << "\nOperator [] - acces cursa aditionala:" << endl;
+            CursaInternationala* cursaIdx = cmd1[0];
+            if (cursaIdx != nullptr) {
+                cout << "Cursa [0]: " << cursaIdx->getCodCursa()
+                    << " - " << cursaIdx->getTaraDestinatie() << endl;
+            }
+
+            // 6. Demonstrare toate relatiile HAS-A
+            cout << "\n6. REZUMAT RELATII HAS-A IN COMANDATRANSPORT:" << endl;
+            cout << "" << endl;
+            cout << "ClientCorporativ* client (pointer - has-a) " << endl;
+            cout << "CursaInternationala cursaPrincipala (obj)   " << endl;
+            cout << "Factura* factura (pointer - has-a)         " << endl;
+            cout << "vector<CursaInternationala*> curseAditionale" << endl;
+            cout << "(vector de pointeri - has-a)                " << endl;
+            cout << "\n" << endl;
+
+            // 7. Test cu operatori << si >>
+            cout << "7. TEST OPERATOR <<" << endl;
+            cout << cmd1 << endl;
+
+            // 8. Statistici
+            cout << "8. STATISTICI COMENZI" << endl;
+            cout << "Total comenzi create: " << ComandaTransport::getNumarTotalComenzi() << endl;
+            cout << "Incasari totale: " << ComandaTransport::getIncasariTotale() << " EUR" << endl;
+
+            // Cleanup
+            delete clientTest1;
+            delete clientTest2;
+            delete cursaTest1;
+            delete cursaTest2;
+            delete cursaTest3;
+            delete facturaTest1;
+            delete facturaTest2;
+
+            cout << "\n" << endl;
+            cout << "     TEST FAZA 5 FINALIZAT CU SUCCES!          " << endl;
+            cout << "" << endl;
+            break;
+        }
+
+        case 34: {
+            if (comenzi.empty()) {
+                cout << "\nNu exista comenzi!" << endl;
+                break;
+            }
+            if (curse.empty()) {
+                cout << "\nNu exista curse disponibile!" << endl;
+                break;
+            }
+
+            cout << "\nADAUGARE CURSA ADITIONALA" << endl;
+            cout << "\nComenzi disponibile:" << endl;
+            for (size_t i = 0; i < comenzi.size(); i++) {
+                cout << (i + 1) << ". " << comenzi[i]->getNumarComanda()
+                    << " (Curse aditionale: " << comenzi[i]->getCurseAditionale().size() << ")" << endl;
+            }
+
+            int idxCmd;
+            cout << "Selectati comanda: ";
+            cin >> idxCmd;
+            cin.ignore();
+
+            if (idxCmd < 1 || idxCmd >(int)comenzi.size()) {
+                cout << "Selectie invalida!" << endl;
+                break;
+            }
+
+            cout << "\nCurse disponibile:" << endl;
+            for (size_t i = 0; i < curse.size(); i++) {
+                cout << (i + 1) << ". " << curse[i]->getCodCursa()
+                    << " - " << curse[i]->getTaraDestinatie() << endl;
+            }
+
+            int idxCursa;
+            cout << "Selectati cursa: ";
+            cin >> idxCursa;
+            cin.ignore();
+
+            if (idxCursa < 1 || idxCursa >(int)curse.size()) {
+                cout << "Selectie invalida!" << endl;
+                break;
+            }
+
+            comenzi[idxCmd - 1]->adaugaCursaAditionala(curse[idxCursa - 1]);
+            cout << "\n✓ Cursa adaugata cu succes!" << endl;
+            comenzi[idxCmd - 1]->afiseaza();
+            break;
+        }
+
+        case 35: {
+            if (comenzi.empty()) {
+                cout << "\nNu exista comenzi!" << endl;
+                break;
+            }
+
+            cout << "\n FINALIZARE COMANDA " << endl;
+            cout << "\nComenzi disponibile:" << endl;
+            for (size_t i = 0; i < comenzi.size(); i++) {
+                cout << (i + 1) << ". " << comenzi[i]->getNumarComanda()
+                    << " - Status: " << (comenzi[i]->getEsteFinalizata() ? "FINALIZATA" : "IN CURS") << endl;
+            }
+
+            int idx;
+            cout << "Selectati comanda: ";
+            cin >> idx;
+            cin.ignore();
+
+            if (idx < 1 || idx >(int)comenzi.size()) {
+                cout << "Selectie invalida!" << endl;
+                break;
+            }
+
+            comenzi[idx - 1]->setEsteFinalizata(true);
+            cout << "\n✓ Comanda finalizata!" << endl;
+            cout << "Valoare: " << comenzi[idx - 1]->getValoareTotala() << " EUR" << endl;
+            break;
+        }
+
+        case 36: {
+            cout << "\n STATISTICI COMENZI" << endl;
+            cout << "Total comenzi: " << ComandaTransport::getNumarTotalComenzi() << endl;
+            cout << "Incasari totale: " << ComandaTransport::getIncasariTotale() << " EUR" << endl;
+
+            if (!comenzi.empty()) {
+                int finalizate = 0;
+                double valoareTotala = 0;
+                for (auto cmd : comenzi) {
+                    if (cmd->getEsteFinalizata()) finalizate++;
+                    valoareTotala += cmd->getValoareTotala();
+                }
+                cout << "Comenzi finalizate: " << finalizate << endl;
+                cout << "Comenzi in curs: " << (comenzi.size() - finalizate) << endl;
+                cout << "Valoare totala comenzi: " << valoareTotala << " EUR" << endl;
+                cout << "Valoare medie/comanda: " << (valoareTotala / comenzi.size()) << " EUR" << endl;
+            }
+            cout << "" << endl;
+            break;
+        }
+               // FAZA 6 - FISIERE
+        case 37: {
+            cout << "\n SALVARE DATE IN FISIERE TEXT " << endl;
+
+            // Salvare clienti
+            if (!clienti.empty()) {
+                for (auto client : clienti) {
+                    ClientCorporativFileManager::salvareTextClient(*client, "clienti.txt");
+                }
+                cout << "✓ " << clienti.size() << " clienti salvati in clienti.txt" << endl;
+            }
+
+            // Salvare curse
+            if (!curse.empty()) {
+                for (auto cursa : curse) {
+                    CursaInternationalaFileManager::salvareTextCursa(*cursa, "curse.txt");
+                }
+                cout << "✓ " << curse.size() << " curse salvate in curse.txt" << endl;
+            }
+
+            // Salvare facturi
+            if (!facturi.empty()) {
+                for (auto factura : facturi) {
+                    FacturaFileManager::salvareTextFactura(*factura, "facturi.txt");
+                }
+                cout << "✓ " << facturi.size() << " facturi salvate in facturi.txt" << endl;
+            }
+
+            // Salvare comenzi
+            if (!comenzi.empty()) {
+                for (auto comanda : comenzi) {
+                    ComandaTransportFileManager::salvareTextComanda(*comanda, "comenzi.txt");
+                }
+                cout << comenzi.size() << " comenzi salvate in comenzi.txt" << endl;
+            }
+
+            cout << "\n TOATE DATELE AU FOST SALVATE IN FISIERE TEXT!" << endl;
+            break;
+        }
+
+        case 38: {
+            cout << "\n CITIRE DATE DIN FISIERE TEXT " << endl;
+            int subOpt;
+            cout << "1. Citire clienti.txt" << endl;
+            cout << "2. Citire curse.txt" << endl;
+            cout << "3. Citire facturi.txt" << endl;
+            cout << "4. Citire comenzi.txt" << endl;
+            cout << "5. Citire toate fisierele" << endl;
+            cout << "Optiune: ";
+            cin >> subOpt;
+            cin.ignore();
+
+            switch (subOpt) {
+            case 1:
+                ClientCorporativFileManager::citireTextClient("clienti.txt");
+                break;
+            case 2:
+                CursaInternationalaFileManager::citireTextCursa("curse.txt");
+                break;
+            case 3:
+                FacturaFileManager::citireTextFactura("facturi.txt");
+                break;
+            case 4:
+                ComandaTransportFileManager::citireTextComanda("comenzi.txt");
+                break;
+            case 5:
+                ClientCorporativFileManager::citireTextClient("clienti.txt");
+                CursaInternationalaFileManager::citireTextCursa("curse.txt");
+                FacturaFileManager::citireTextFactura("facturi.txt");
+                ComandaTransportFileManager::citireTextComanda("comenzi.txt");
+                break;
+            default:
+                cout << "Optiune invalida!" << endl;
+            }
+            break;
+        }
+
+        case 39: {
+            cout << "\n SALVARE DATE IN FISIERE BINARE " << endl;
+
+            // Salvare clienti
+            if (!clienti.empty()) {
+                for (auto client : clienti) {
+                    ClientCorporativFileManager::salvareBinarClient(*client, "clienti.bin");
+                }
+                cout << clienti.size() << " clienti salvati in clienti.bin" << endl;
+            }
+
+            // Salvare curse
+            if (!curse.empty()) {
+                for (auto cursa : curse) {
+                    CursaInternationalaFileManager::salvareBinarCursa(*cursa, "curse.bin");
+                }
+                cout << curse.size() << " curse salvate in curse.bin" << endl;
+            }
+
+            // Salvare facturi
+            if (!facturi.empty()) {
+                for (auto factura : facturi) {
+                    FacturaFileManager::salvareBinarFactura(*factura, "facturi.bin");
+                }
+                cout << facturi.size() << " facturi salvate in facturi.bin" << endl;
+            }
+
+            // Salvare comenzi
+            if (!comenzi.empty()) {
+                for (auto comanda : comenzi) {
+                    ComandaTransportFileManager::salvareBinarComanda(*comanda, "comenzi.bin");
+                }
+                cout << comenzi.size() << " comenzi salvate in comenzi.bin" << endl;
+            }
+
+            cout << "\n TOATE DATELE AU FOST SALVATE IN FISIERE BINARE!" << endl;
+            break;
+        }
+
+        case 40: {
+            cout << "\n CITIRE DATE DIN FISIERE BINARE " << endl;
+            int subOpt;
+            cout << "1. Citire clienti.bin" << endl;
+            cout << "2. Citire curse.bin" << endl;
+            cout << "3. Citire facturi.bin" << endl;
+            cout << "4. Citire comenzi.bin" << endl;
+            cout << "5. Citire toate fisierele" << endl;
+            cout << "Optiune: ";
+            cin >> subOpt;
+            cin.ignore();
+
+            switch (subOpt) {
+            case 1:
+                ClientCorporativFileManager::citireBinarClient("clienti.bin");
+                break;
+            case 2:
+                CursaInternationalaFileManager::citireBinarCursa("curse.bin");
+                break;
+            case 3:
+                FacturaFileManager::citireBinarFactura("facturi.bin");
+                break;
+            case 4:
+                ComandaTransportFileManager::citireBinarComanda("comenzi.bin");
+                break;
+            case 5:
+                ClientCorporativFileManager::citireBinarClient("clienti.bin");
+                CursaInternationalaFileManager::citireBinarCursa("curse.bin");
+                FacturaFileManager::citireBinarFactura("facturi.bin");
+                ComandaTransportFileManager::citireBinarComanda("comenzi.bin");
+                break;
+            default:
+                cout << "Optiune invalida!" << endl;
+            }
+            break;
+        }
+
+        case 41: {
+            cout << "  TEST COMPLET FAZA 6 - FISIERE    " << endl;
+
+            // Creare obiecte de test
+            cout << "1. Creare obiecte de test pentru fisiere..." << endl;
+
+            ClientCorporativ clientTest("FileTest SRL", "Adresa Test", "Contact Test",
+                50, "RO12345678", 1500.0, true);
+
+            CursaInternationala cursaTest("Romania", "Germania", 2000.0, 24.0,
+                40, "SOF-999", "01/01/2025");
+
+            double preturiTest[] = { 1000.0, 500.0 };
+            Factura facturaTest("FACT-TEST", "01/01/2025", "FileTest SRL",
+                preturiTest, 2, "EUR", false);
+
+            ComandaTransport comandaTest("CMD-TEST", "01/01/2025", &clientTest,
+                cursaTest, &facturaTest, "Test fisiere");
+
+            cout << "✓ Obiecte create!\n" << endl;
+
+            // TEST FISIERE TEXT
+            cout << "2. TEST SALVARE/CITIRE FISIERE TEXT" << endl;
+            cout << "" << endl;
+
+            ClientCorporativFileManager::salvareTextClient(clientTest, "test_client.txt");
+            CursaInternationalaFileManager::salvareTextCursa(cursaTest, "test_cursa.txt");
+            FacturaFileManager::salvareTextFactura(facturaTest, "test_factura.txt");
+            ComandaTransportFileManager::salvareTextComanda(comandaTest, "test_comanda.txt");
+
+            cout << "\nCitire inapoi din fisiere TEXT:" << endl;
+            ClientCorporativFileManager::citireTextClient("test_client.txt");
+
+            // TEST FISIERE BINARE
+            cout << "\n3. TEST SALVARE/CITIRE FISIERE BINARE" << endl;
+            cout << "" << endl;
+
+            ClientCorporativFileManager::salvareBinarClient(clientTest, "test_client.bin");
+            CursaInternationalaFileManager::salvareBinarCursa(cursaTest, "test_cursa.bin");
+            FacturaFileManager::salvareBinarFactura(facturaTest, "test_factura.bin");
+            ComandaTransportFileManager::salvareBinarComanda(comandaTest, "test_comanda.bin");
+
+            cout << "\nCitire inapoi din fisiere BINARE:" << endl;
+            ClientCorporativFileManager::citireBinarClient("test_client.bin");
+
+            // REZUMAT
+            cout << "\n4. REZUMAT FAZA 6" << endl;
+            cout << "" << endl;
+            cout << "✓ ClientCorporativ: 2 metode TEXT + 2 metode BINAR" << endl;
+            cout << "✓ CursaInternationala: 2 metode TEXT + 2 metode BINAR" << endl;
+            cout << "✓ Factura: 2 metode TEXT + 2 metode BINAR" << endl;
+            cout << "✓ ComandaTransport: 2 metode TEXT + 2 metode BINAR" << endl;
+            cout << "" << endl;
+            cout << "TOTAL: 8 metode TEXT + 8 metode BINAR = 16 metode" << endl;
+
+            cout << "\n" << endl;
+            cout << "      TEST FAZA 6 FINALIZAT CU SUCCES!            " << endl;
+            cout << "" << endl;
+            break;
+        }
         case 0:
             cout << "\nIesire din program..." << endl;
             for (auto c : clienti) delete c;

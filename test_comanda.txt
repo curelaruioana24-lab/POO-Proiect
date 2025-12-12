@@ -1,0 +1,11 @@
+========== COMANDA TRANSPORT ==========
+ID: 1
+Numar: CMD-TEST
+Data: 01/01/2025
+Client: FileTest SRL
+Cursa principala: CURS-1
+Curse aditionale: 0
+Valoare totala: 1555 EUR
+Observatii: Test fisiere
+Finalizata: NU
+========================================
