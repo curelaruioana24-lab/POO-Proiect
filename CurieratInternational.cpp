@@ -2423,6 +2423,401 @@ public:
     }
 };
 
+
+//  FAZA 7 - MOSTENIRE SI UPCASTING
+// 
+//  CLASA 1 DERIVATA: ClientCorporativPremium (mosteneste ClientCorporativ)
+
+class ClientCorporativPremium : public ClientCorporativ {
+private:
+    int nivelPremium;           // 1-5 (gold, platinum, diamond, etc.)
+    double discountSuplimentar;
+    char* managerDedicat;
+    bool accesPrioritateSuport;
+    int puncteFidelitate;
+
+public:
+    // Constructor implicit
+    ClientCorporativPremium()
+        : ClientCorporativ(),
+        nivelPremium(1),
+        discountSuplimentar(0.05),
+        managerDedicat(nullptr),
+        accesPrioritateSuport(true),
+        puncteFidelitate(0) {
+
+        managerDedicat = new char[100];
+        strcpy(managerDedicat, "Manager Nedefinit");
+    }
+
+    // Constructor cu parametri
+    ClientCorporativPremium(const char* nume, const char* adresa, const char* contact,
+        int angajati, string cod, double volum, bool activ,
+        int nivel, double discountExtra, const char* manager, int puncte)
+        : ClientCorporativ(nume, adresa, contact, angajati, cod, volum, activ),
+        nivelPremium(nivel),
+        discountSuplimentar(discountExtra),
+        managerDedicat(nullptr),
+        accesPrioritateSuport(true),
+        puncteFidelitate(puncte) {
+
+        size_t len = strlen(manager);
+        managerDedicat = new char[len + 1];
+        strcpy(managerDedicat, manager);
+    }
+
+    // Constructor de copiere
+    ClientCorporativPremium(const ClientCorporativPremium& c)
+        : ClientCorporativ(c),
+        nivelPremium(c.nivelPremium),
+        discountSuplimentar(c.discountSuplimentar),
+        managerDedicat(nullptr),
+        accesPrioritateSuport(c.accesPrioritateSuport),
+        puncteFidelitate(c.puncteFidelitate) {
+
+        if (c.managerDedicat) {
+            size_t len = strlen(c.managerDedicat);
+            managerDedicat = new char[len + 1];
+            strcpy(managerDedicat, c.managerDedicat);
+        }
+    }
+
+    // Destructor
+    ~ClientCorporativPremium() {
+        delete[] managerDedicat;
+    }
+
+    // Operator de atribuire
+    ClientCorporativPremium& operator=(const ClientCorporativPremium& c) {
+        if (this != &c) {
+            ClientCorporativ::operator=(c);
+
+            delete[] managerDedicat;
+
+            nivelPremium = c.nivelPremium;
+            discountSuplimentar = c.discountSuplimentar;
+            accesPrioritateSuport = c.accesPrioritateSuport;
+            puncteFidelitate = c.puncteFidelitate;
+
+            if (c.managerDedicat) {
+                size_t len = strlen(c.managerDedicat);
+                managerDedicat = new char[len + 1];
+                strcpy(managerDedicat, c.managerDedicat);
+            }
+        }
+        return *this;
+    }
+
+    // GETTERI specifici
+    int getNivelPremium() const { return nivelPremium; }
+    double getDiscountSuplimentar() const { return discountSuplimentar; }
+    const char* getManagerDedicat() const { return managerDedicat; }
+    bool getAccesPrioritateSuport() const { return accesPrioritateSuport; }
+    int getPuncteFidelitate() const { return puncteFidelitate; }
+
+    // SETTERI specifici
+    void setNivelPremium(int nivel) {
+        if (nivel >= 1 && nivel <= 5) nivelPremium = nivel;
+    }
+
+    void setDiscountSuplimentar(double discount) {
+        if (discount >= 0 && discount <= 0.5) discountSuplimentar = discount;
+    }
+
+    void setManagerDedicat(const char* manager) {
+        if (manager != nullptr) {
+            delete[] managerDedicat;
+            size_t len = strlen(manager);
+            managerDedicat = new char[len + 1];
+            strcpy(managerDedicat, manager);
+        }
+    }
+
+    void setAccesPrioritateSuport(bool acces) {
+        accesPrioritateSuport = acces;
+    }
+
+    void adaugaPuncteFidelitate(int puncte) {
+        puncteFidelitate += puncte;
+    }
+
+    // Metoda specifica - calcul discount total
+    double calculeazaDiscountTotal() const {
+        double discountBaza = ClientCorporativ::getDiscount();
+        return discountBaza + discountSuplimentar + (nivelPremium * 0.01);
+    }
+
+    // Metoda pentru upgrade nivel
+    void upgradeNivel() {
+        if (nivelPremium < 5) {
+            nivelPremium++;
+            discountSuplimentar += 0.02;
+            cout << " Client promovat la nivel Premium " << nivelPremium << "!" << endl;
+        }
+        else {
+            cout << "Client deja la nivel maxim!" << endl;
+        }
+    }
+
+    // Suprascrierea metodei afiseaza() din clasa de baza
+    void afiseaza() const {
+        cout << "     CLIENT CORPORATIV PREMIUM #" << getID() << endl;
+
+        // Afisare date din clasa de baza
+        cout << "Companie: " << getNumeCompanie() << endl;
+        cout << "Adresa: " << getAdresaSediu() << endl;
+        cout << "Contact: " << getPersoanaContact() << endl;
+        cout << "Angajati: " << getNrAngajati() << endl;
+        cout << "Cod Fiscal: " << getCodFiscal() << endl;
+        cout << "Volum/Luna: " << getVolumTransporturiLunar() << " tone" << endl;
+        cout << "Status: " << (getEsteActiv() ? "ACTIV" : "INACTIV") << endl;
+
+        // Afisare date specifice Premium
+        cout << "\n STATUS PREMIUM " << endl;
+        cout << "Nivel Premium: " << nivelPremium << " *";
+        for (int i = 1; i < nivelPremium; i++) cout << "*";
+        cout << endl;
+        cout << "Discount Suplimentar: " << (discountSuplimentar * 100) << "%" << endl;
+        cout << "Discount Total: " << (calculeazaDiscountTotal() * 100) << "%" << endl;
+        cout << "Manager Dedicat: " << managerDedicat << endl;
+        cout << "Acces Prioritate Suport: " << (accesPrioritateSuport ? "DA" : "NU") << endl;
+        cout << "Puncte Fidelitate: " << puncteFidelitate << endl;
+    }
+};
+
+//  CLASA 2 DERIVATA: CursaExpres (mosteneste CursaInternationala)
+
+class CursaExpres : public CursaInternationala {
+private:
+    bool livrareGarantata24h;
+    double taxaUrgenta;
+    char* prioritate;           // "STANDARD", "EXPRESS", "SUPER_EXPRESS"
+    int oreLivrareGarantate;
+    bool asigurareInclusa;
+
+public:
+    // Constructor implicit
+    CursaExpres()
+        : CursaInternationala(),
+        livrareGarantata24h(true),
+        taxaUrgenta(200.0),
+        prioritate(nullptr),
+        oreLivrareGarantate(24),
+        asigurareInclusa(true) {
+
+        prioritate = new char[50];
+        strcpy(prioritate, "EXPRESS");
+    }
+
+    // Constructor cu parametri
+    CursaExpres(const char* origine, string destinatie, double distanta,
+        double durata, int colete, const char* sofer, const char* data,
+        bool garantie24h, double taxaUrg, const char* prior, int oreGarantate)
+        : CursaInternationala(origine, destinatie, distanta, durata, colete, sofer, data),
+        livrareGarantata24h(garantie24h),
+        taxaUrgenta(taxaUrg),
+        prioritate(nullptr),
+        oreLivrareGarantate(oreGarantate),
+        asigurareInclusa(true) {
+
+        size_t len = strlen(prior);
+        prioritate = new char[len + 1];
+        strcpy(prioritate, prior);
+    }
+
+    // Constructor de copiere
+    CursaExpres(const CursaExpres& c)
+        : CursaInternationala(c),
+        livrareGarantata24h(c.livrareGarantata24h),
+        taxaUrgenta(c.taxaUrgenta),
+        prioritate(nullptr),
+        oreLivrareGarantate(c.oreLivrareGarantate),
+        asigurareInclusa(c.asigurareInclusa) {
+
+        if (c.prioritate) {
+            size_t len = strlen(c.prioritate);
+            prioritate = new char[len + 1];
+            strcpy(prioritate, c.prioritate);
+        }
+    }
+
+    // Destructor
+    ~CursaExpres() {
+        delete[] prioritate;
+    }
+
+    // Operator de atribuire
+    CursaExpres& operator=(const CursaExpres& c) {
+        if (this != &c) {
+            CursaInternationala::operator=(c);
+
+            delete[] prioritate;
+
+            livrareGarantata24h = c.livrareGarantata24h;
+            taxaUrgenta = c.taxaUrgenta;
+            oreLivrareGarantate = c.oreLivrareGarantate;
+            asigurareInclusa = c.asigurareInclusa;
+
+            if (c.prioritate) {
+                size_t len = strlen(c.prioritate);
+                prioritate = new char[len + 1];
+                strcpy(prioritate, c.prioritate);
+            }
+        }
+        return *this;
+    }
+
+    // GETTERI specifici
+    bool getLivrareGarantata24h() const { return livrareGarantata24h; }
+    double getTaxaUrgenta() const { return taxaUrgenta; }
+    const char* getPrioritate() const { return prioritate; }
+    int getOreLivrareGarantate() const { return oreLivrareGarantate; }
+    bool getAsigurareInclusa() const { return asigurareInclusa; }
+
+    // SETTERI specifici
+    void setLivrareGarantata24h(bool garantie) {
+        livrareGarantata24h = garantie;
+    }
+
+    void setTaxaUrgenta(double taxa) {
+        if (taxa >= 0) taxaUrgenta = taxa;
+    }
+
+    void setPrioritate(const char* prior) {
+        if (prior != nullptr) {
+            delete[] prioritate;
+            size_t len = strlen(prior);
+            prioritate = new char[len + 1];
+            strcpy(prioritate, prior);
+        }
+    }
+
+    void setOreLivrareGarantate(int ore) {
+        if (ore > 0) oreLivrareGarantate = ore;
+    }
+
+    void setAsigurareInclusa(bool asigurare) {
+        asigurareInclusa = asigurare;
+    }
+
+    // Metoda specifica - calcul cost total cu taxe expres
+    double calculeazaCostTotalExpres() const {
+        double costBaza = CursaInternationala::calculeazaCostTotalCursa(
+            getDistantaKm(), getNrColete(), false);
+
+        double costTotal = costBaza + taxaUrgenta;
+
+        // Discount pentru volum mare
+        if (getNrColete() > 50) {
+            costTotal *= 0.95;  // 5% discount
+        }
+
+        // Cost asigurare
+        if (asigurareInclusa) {
+            costTotal += 100.0;
+        }
+
+        return costTotal;
+    }
+
+    // Metoda pentru upgrade prioritate
+    void upgradePrioritate() {
+        if (strcmp(prioritate, "STANDARD") == 0) {
+            setPrioritate("EXPRESS");
+            taxaUrgenta += 100.0;
+            oreLivrareGarantate = 24;
+        }
+        else if (strcmp(prioritate, "EXPRESS") == 0) {
+            setPrioritate("SUPER_EXPRESS");
+            taxaUrgenta += 150.0;
+            oreLivrareGarantate = 12;
+        }
+        else {
+            cout << "Cursa deja la prioritate maxima!" << endl;
+            return;
+        }
+        cout << "✓ Cursa promovata la " << prioritate << "!" << endl;
+    }
+
+    // Suprascrierea metodei afiseaza() din clasa de baza
+    void afiseaza() const {
+        cout << "        CURSA EXPRES INTERNATIONALA" << endl;
+
+        // Afisare date din clasa de baza
+        cout << "Cod: " << getCodCursa() << endl;
+        cout << "Ruta: " << getTaraOrigine() << " → " << getTaraDestinatie() << endl;
+        cout << "Distanta: " << getDistantaKm() << " km" << endl;
+        cout << "Durata: " << getDurataTimpOre() << " ore" << endl;
+        cout << "Colete: " << getNrColete() << endl;
+        cout << "Sofer: " << getSoferId() << endl;
+        cout << "Data: " << getDataPlecarii() << endl;
+        cout << "Status: " << (getEsteFinalizata() ? "FINALIZATA" : "IN CURS") << endl;
+
+        // Afisare date specifice Expres
+        cout << "\n SERVICII EXPRES " << endl;
+        cout << "Prioritate: " << prioritate << " ⚡" << endl;
+        cout << "Livrare Garantata: " << (livrareGarantata24h ? "DA" : "NU") << endl;
+        cout << "Ore Garantate: " << oreLivrareGarantate << "h" << endl;
+        cout << "Taxa Urgenta: " << taxaUrgenta << " EUR" << endl;
+        cout << "Asigurare Inclusa: " << (asigurareInclusa ? "DA" : "NU") << endl;
+        cout << "Cost Total Expres: " << calculeazaCostTotalExpres() << " EUR" << endl;
+    }
+};
+
+//  FUNCTII - UPCASTING
+
+// Functie care primeste un pointer la clasa de baza ClientCorporativ
+void proceseazaClient(ClientCorporativ* client) {
+    cout << "\n→ PROCESARE CLIENT (UPCASTING)" << endl;
+    cout << "Companie: " << client->getNumeCompanie() << endl;
+    cout << "Volum: " << client->getVolumTransporturiLunar() << " tone" << endl;
+    cout << "Angajati: " << client->getNrAngajati() << endl;
+
+    // Calcul pret cu discount
+    double pret = 10000.0;
+    double pretFinal = ClientCorporativ::calculeazaPretFinal(pret,
+        client->getVolumTransporturiLunar());
+    cout << "Pret estimat: " << pretFinal << " EUR" << endl;
+}
+
+// Functie care primeste un pointer la clasa de baza CursaInternationala
+void proceseazaCursa(CursaInternationala* cursa) {
+    cout << "\n→ PROCESARE CURSA (UPCASTING)" << endl;
+    cout << "Cod: " << cursa->getCodCursa() << endl;
+    cout << "Destinatie: " << cursa->getTaraDestinatie() << endl;
+    cout << "Distanta: " << cursa->getDistantaKm() << " km" << endl;
+    cout << "Colete: " << cursa->getNrColete() << endl;
+
+    // Calcul viteza medie
+    if (cursa->getDurataTimpOre() > 0) {
+        double viteza = cursa->getDistantaKm() / cursa->getDurataTimpOre();
+        cout << "Viteza medie: " << viteza << " km/h" << endl;
+    }
+}
+
+// Functie care proceseaza un vector de clienti (upcasting)
+void proceseazaVectorClienti(ClientCorporativ** clienti, int nrClienti) {
+    cout << "PROCESARE BATCH CLIENTI (UPCASTING)" << endl;
+
+    double volumTotal = 0;
+    int angajatiTotal = 0;
+
+    for (int i = 0; i < nrClienti; i++) {
+        cout << (i + 1) << ". " << clienti[i]->getNumeCompanie();
+        cout << " - Volum: " << clienti[i]->getVolumTransporturiLunar() << " tone" << endl;
+
+        volumTotal += clienti[i]->getVolumTransporturiLunar();
+        angajatiTotal += clienti[i]->getNrAngajati();
+    }
+
+    cout << "\n STATISTICI GENERALE " << endl;
+    cout << "Volum total: " << volumTotal << " tone" << endl;
+    cout << "Angajati total: " << angajatiTotal << endl;
+    cout << "Volum mediu/client: " << (volumTotal / nrClienti) << " tone" << endl;
+}
+
+
+
 //
 // FUNCTIA MAIN - CU TESTE PENTRU FAZA 3 (plecand de la FAZA 2)
 //
@@ -2435,13 +2830,12 @@ int main() {
     vector<ClientCorporativ*> clienti;
     vector<CursaInternationala*> curse;
     vector<Factura*> facturi;
-
-    // VECTORI pentru testare Faza 4
     vector<ClientCorporativ> vectorClienti;
     vector<CursaInternationala> vectorCurse;
     vector<Factura> vectorFacturi;
-
     vector<ComandaTransport*> comenzi;
+    vector<ClientCorporativPremium*> clientiPremium;
+    vector<CursaExpres*> curseExpres;
 
     do {
         cout << "\n MENIU PRINCIPAL " << endl;
@@ -2482,19 +2876,27 @@ int main() {
         cout << "29. Test complet Faza 4 (vectori + matrice)" << endl;
         cout << "30. Operatii avansate (submeniu: operatori, comparatie, matrice)" << endl;
 
-        cout << "\n  FAZA 5 - COMENZI TRANSPORT (HAS-A) " << endl;
+        cout << "\n  COMENZI TRANSPORT (HAS-A) " << endl;
         cout << "31. Creare comanda transport noua" << endl;
         cout << "32. Afisare toate comenzile" << endl;
         cout << "33. Test complet Faza 5 (relatii has-a)" << endl;
         cout << "34. Adauga cursa aditionala la comanda" << endl;
         cout << "35. Finalizare comanda" << endl;
         cout << "36. Statistici comenzi" << endl;
-        cout << "\n  FAZA 6 - FISIERE TEXT SI BINARE " << endl;
+        cout << "\n  FISIERE TEXT SI BINARE " << endl;
         cout << "37. Salvare date in fisiere TEXT" << endl;
         cout << "38. Citire date din fisiere TEXT" << endl;
         cout << "39. Salvare date in fisiere BINARE" << endl;
         cout << "40. Citire date din fisiere BINARE" << endl;
         cout << "41. Test complet Faza 6 (toate fisierele)" << endl;
+        cout << "\n  MOSTENIRE SI UPCASTING " << endl;
+        cout << "42. Creare Client Premium" << endl;
+        cout << "43. Creare Cursa Expres" << endl;
+        cout << "44. Afisare Clienti Premium" << endl;
+        cout << "45. Afisare Curse Expres" << endl;
+        cout << "46. Test UPCASTING - Procesare ca clasa de baza" << endl;
+        cout << "47. Test complet Faza 7 (mostenire + upcasting)" << endl;
+        cout << "48. Upgrade nivel Premium / Prioritate Expres" << endl;
         cout << "\n0. Iesire" << endl;
         cout << "" << endl;
         cout << "Optiune: ";
@@ -4308,6 +4710,388 @@ int main() {
             cout << "" << endl;
             break;
         }
+               // FAZA 7 - MOSTENIRE SI UPCASTING 
+
+        case 42: {
+            cout << "\n CREARE CLIENT PREMIUM " << endl;
+
+            char nume[200], adresa[200], contact[200], manager[200];
+            int angajati, nivel, puncte;
+            string codFiscal;
+            double volum, discountExtra;
+            bool activ;
+            char activChar;
+
+            cout << "Nume companie: ";
+            cin.getline(nume, 200);
+
+            cout << "Adresa sediu: ";
+            cin.getline(adresa, 200);
+
+            cout << "Persoana contact: ";
+            cin.getline(contact, 200);
+
+            cout << "Numar angajati: ";
+            cin >> angajati;
+
+            cout << "Cod fiscal: ";
+            cin >> codFiscal;
+
+            cout << "Volum transporturi lunar (tone): ";
+            cin >> volum;
+
+            cout << "Activ (d/n): ";
+            cin >> activChar;
+            activ = (activChar == 'd' || activChar == 'D');
+
+            cout << "\n DATE PREMIUM " << endl;
+            cout << "Nivel Premium (1-5): ";
+            cin >> nivel;
+
+            cout << "Discount suplimentar (0-0.5, ex: 0.1 = 10%): ";
+            cin >> discountExtra;
+
+            cin.ignore();
+            cout << "Manager dedicat: ";
+            cin.getline(manager, 200);
+
+            cout << "Puncte fidelitate initiale: ";
+            cin >> puncte;
+            cin.ignore();
+
+            ClientCorporativPremium* clientPremium = new ClientCorporativPremium(
+                nume, adresa, contact, angajati, codFiscal, volum, activ,
+                nivel, discountExtra, manager, puncte
+            );
+
+            clientiPremium.push_back(clientPremium);
+            cout << "\n Client Premium creat cu succes!" << endl;
+            clientPremium->afiseaza();
+            break;
+        }
+
+        case 43: {
+            cout << "\n CREARE CURSA EXPRES" << endl;
+
+            char origine[200], sofer[200], data[200], prior[50];
+            string destinatie;
+            double distanta, durata, taxaUrg;
+            int colete, oreGarantate;
+            bool garantie24h;
+            char garantieChar;
+
+            cout << "Tara origine: ";
+            cin.getline(origine, 200);
+
+            cout << "Tara destinatie: ";
+            getline(cin, destinatie);
+
+            cout << "Distanta (km): ";
+            cin >> distanta;
+
+            cout << "Durata (ore): ";
+            cin >> durata;
+
+            cout << "Numar colete: ";
+            cin >> colete;
+
+            cin.ignore();
+            cout << "ID sofer: ";
+            cin.getline(sofer, 200);
+
+            cout << "Data plecarii (DD/MM/YYYY): ";
+            cin.getline(data, 200);
+
+            cout << "\n DATE EXPRES " << endl;
+            cout << "Livrare garantata 24h (d/n): ";
+            cin >> garantieChar;
+            garantie24h = (garantieChar == 'd' || garantieChar == 'D');
+
+            cout << "Taxa urgenta (EUR): ";
+            cin >> taxaUrg;
+
+            cin.ignore();
+            cout << "Prioritate (STANDARD/EXPRESS/SUPER_EXPRESS): ";
+            cin.getline(prior, 50);
+
+            cout << "Ore livrare garantate: ";
+            cin >> oreGarantate;
+            cin.ignore();
+
+            CursaExpres* cursaExpres = new CursaExpres(
+                origine, destinatie, distanta, durata, colete, sofer, data,
+                garantie24h, taxaUrg, prior, oreGarantate
+            );
+
+            curseExpres.push_back(cursaExpres);
+            cout << "\n Cursa Expres creata cu succes!" << endl;
+            cursaExpres->afiseaza();
+            break;
+        }
+
+        case 44: {
+            if (clientiPremium.empty()) {
+                cout << "\nNu exista clienti premium!" << endl;
+            }
+            else {
+                cout << "\n TOTI CLIENTII PREMIUM " << endl;
+                for (auto client : clientiPremium) {
+                    client->afiseaza();
+                }
+                cout << "Total clienti premium: " << clientiPremium.size() << endl;
+            }
+            break;
+        }
+
+        case 45: {
+            if (curseExpres.empty()) {
+                cout << "\n Nu exista curse expres!" << endl;
+            }
+            else {
+                cout << "\n TOATE CURSELE EXPRES " << endl;
+                for (auto cursa : curseExpres) {
+                    cursa->afiseaza();
+                }
+                cout << "Total curse expres: " << curseExpres.size() << endl;
+            }
+            break;
+        }
+
+        case 46: {
+            cout << "  TEST UPCASTING - CLASA DE BAZA      " << endl;
+
+            if (clientiPremium.empty() && curseExpres.empty()) {
+                cout << "Nu exista obiecte derivate! Creaza clienti premium sau curse expres." << endl;
+                break;
+            }
+
+            // UPCASTING pentru ClientiPremium
+            if (!clientiPremium.empty()) {
+                cout << " UPCASTING CLIENTI PREMIUM → CLIENT CORPORATIV \n" << endl;
+
+                for (size_t i = 0; i < clientiPremium.size(); i++) {
+                    cout << "\n Client Premium #" << (i + 1) << ":" << endl;
+
+                    // UPCASTING: Pointer la clasa derivata → Pointer la clasa de baza
+                    ClientCorporativ* clientBaza = clientiPremium[i];
+
+                    proceseazaClient(clientBaza);
+
+                    cout << "\n Obiectul ClientCorporativPremium a fost tratat ca ClientCorporativ!" << endl;
+                }
+            }
+
+            // UPCASTING pentru CurseExpres
+            if (!curseExpres.empty()) {
+                cout << "\n UPCASTING CURSE EXPRES → CURSA INTERNATIONALA \n" << endl;
+
+                for (size_t i = 0; i < curseExpres.size(); i++) {
+                    cout << "\nCursa Expres #" << (i + 1) << ":" << endl;
+
+                    // UPCASTING: Pointer la clasa derivata → Pointer la clasa de baza
+                    CursaInternationala* cursaBaza = curseExpres[i];
+
+                    proceseazaCursa(cursaBaza);
+
+                    cout << "\n Obiectul CursaExpres a fost tratat ca CursaInternationala!" << endl;
+                }
+            }
+
+            // UPCASTING cu vector mixt
+            if (!clientiPremium.empty() || !clienti.empty()) {
+                cout << "\n\n  UPCASTING VECTOR MIXT DE CLIENTI \n" << endl;
+
+                // Cream un vector de pointeri la clasa de baza
+                vector<ClientCorporativ*> vectorMixt;
+
+                // Adaugam clienti normali (deja sunt clasa de baza)
+                for (auto client : clienti) {
+                    vectorMixt.push_back(client);
+                }
+
+                // Adaugam clienti premium (UPCASTING automat)
+                for (auto clientPrem : clientiPremium) {
+                    vectorMixt.push_back(clientPrem);  // UPCASTING!
+                }
+
+                if (!vectorMixt.empty()) {
+                    ClientCorporativ** arrayClienti = new ClientCorporativ * [vectorMixt.size()];
+                    for (size_t i = 0; i < vectorMixt.size(); i++) {
+                        arrayClienti[i] = vectorMixt[i];
+                    }
+
+                    proceseazaVectorClienti(arrayClienti, vectorMixt.size());
+
+                    delete[] arrayClienti;
+
+                    cout << "\n  Vector mixt procesat cu succes!" << endl;
+                    cout << "  - Clienti normali: " << clienti.size() << endl;
+                    cout << "  - Clienti premium: " << clientiPremium.size() << endl;
+                    cout << "  - Total procesati: " << vectorMixt.size() << endl;
+                }
+            }
+
+            cout << " UPCASTING CU SUCCES!" << endl;
+            break;
+        }
+
+        case 47: {
+            cout << " TEST COMPLET FAZA 7 - MOSTENIRE + UPCASTING  " << endl;
+
+            // 1. Creare obiecte derivate
+            cout << "1. CREARE OBIECTE DERIVATE\n" << endl;
+
+            ClientCorporativPremium* premiumTest1 = new ClientCorporativPremium(
+                "MegaCorp Premium SRL", "Bucuresti, Sector 1", "Ana Popescu",
+                150, "RO99887766", 5000.0, true,
+                3, 0.15, "Andrei Ionescu", 1500
+            );
+
+            ClientCorporativPremium* premiumTest2 = new ClientCorporativPremium(
+                "EliteTransport SRL", "Cluj-Napoca", "Maria Georgescu",
+                200, "RO55443322", 7000.0, true,
+                5, 0.25, "Cristian Popescu", 3000
+            );
+
+            CursaExpres* expresTest1 = new CursaExpres(
+                "Romania", "Germania", 2200.0, 20.0, 60, "SOF-EXPRES-01", "20/12/2024",
+                true, 300.0, "SUPER_EXPRESS", 12
+            );
+
+            CursaExpres* expresTest2 = new CursaExpres(
+                "Romania", "Franta", 2800.0, 24.0, 80, "SOF-EXPRES-02", "21/12/2024",
+                true, 250.0, "EXPRESS", 24
+            );
+
+            cout << "✓ Obiecte derivate create!\n" << endl;
+
+            // 2. Afisare obiecte derivate
+            cout << "2. AFISARE OBIECTE DERIVATE (metode suprascrise)\n" << endl;
+            premiumTest1->afiseaza();
+            expresTest1->afiseaza();
+
+            // 3. Demonstrare UPCASTING
+            cout << "3. DEMONSTRARE UPCASTING\n" << endl;
+
+            cout << "--- ClientCorporativPremium → ClientCorporativ ---" << endl;
+            ClientCorporativ* clientBaza1 = premiumTest1;  // UPCASTING
+            ClientCorporativ* clientBaza2 = premiumTest2;  // UPCASTING
+
+            proceseazaClient(clientBaza1);
+            proceseazaClient(clientBaza2);
+
+            cout << "\n CursaExpres → CursaInternationala" << endl;
+            CursaInternationala* cursaBaza1 = expresTest1;  // UPCASTING
+            CursaInternationala* cursaBaza2 = expresTest2;  // UPCASTING
+
+            proceseazaCursa(cursaBaza1);
+            proceseazaCursa(cursaBaza2);
+
+            // 4. Vector polimorfic (upcasting in vector)
+            cout << "\n4. VECTOR POLIMORFIC (UPCASTING)\n" << endl;
+
+            ClientCorporativ* vectorClienti[4];
+            vectorClienti[0] = new ClientCorporativ("Standard SRL", "Timisoara", "Contact1",
+                50, "RO11111111", 1000.0, true);
+            vectorClienti[1] = premiumTest1;  // UPCASTING
+            vectorClienti[2] = new ClientCorporativ("Basic SRL", "Iasi", "Contact2",
+                30, "RO22222222", 800.0, true);
+            vectorClienti[3] = premiumTest2;  // UPCASTING
+
+            proceseazaVectorClienti(vectorClienti, 4);
+
+            // 5. Test metode specifice claselor derivate
+            cout << "\n5. TEST METODE SPECIFICE CLASE DERIVATE\n" << endl;
+
+            cout << " Upgrade nivel Premium" << endl;
+            premiumTest1->upgradeNivel();
+            cout << "Discount total dupa upgrade: "
+                << (premiumTest1->calculeazaDiscountTotal() * 100) << "%" << endl;
+
+            cout << "\n Upgrade prioritate Expres" << endl;
+            expresTest1->upgradePrioritate();
+            cout << "Cost total dupa upgrade: "
+                << expresTest1->calculeazaCostTotalExpres() << " EUR" << endl;
+
+            // 6. Rezumat
+            cout << "\n6. REZUMAT FAZA 7" << endl;
+            cout << "- ClientCorporativPremium moștenește ClientCorporativ" << endl;
+            cout << "- CursaExpres moștenește CursaInternationala" << endl;
+            cout << "- Constructori, destructori și operatori implementați" << endl;
+            cout << "- Getteri și setteri pentru atribute noi" << endl;
+            cout << "- Metode suprascrise (afiseaza)" << endl;
+            cout << "- Metode specifice claselor derivate" << endl;
+            cout << "- UPCASTING demonstrat cu succes!" << endl;
+            cout << "- Obiecte derivate tratate ca obiecte din clasa de bază" << endl;
+
+            // Cleanup partial
+            delete vectorClienti[0];
+            delete vectorClienti[2];
+            delete premiumTest1;
+            delete premiumTest2;
+            delete expresTest1;
+            delete expresTest2;
+
+            cout << "TEST FAZA 7 FINALIZAT CU SUCCES!         " << endl;
+            break;
+        }
+
+        case 48: {
+            cout << "\n UPGRADE NIVEL / PRIORITATE " << endl;
+            cout << "1. Upgrade nivel Client Premium" << endl;
+            cout << "2. Upgrade prioritate Cursa Expres" << endl;
+            cout << "Optiune: ";
+            int subOpt;
+            cin >> subOpt;
+            cin.ignore();
+
+            if (subOpt == 1) {
+                if (clientiPremium.empty()) {
+                    cout << "Nu exista clienti premium!" << endl;
+                    break;
+                }
+
+                cout << "\nClienti Premium disponibili:" << endl;
+                for (size_t i = 0; i < clientiPremium.size(); i++) {
+                    cout << (i + 1) << ". " << clientiPremium[i]->getNumeCompanie()
+                        << " - Nivel: " << clientiPremium[i]->getNivelPremium() << endl;
+                }
+
+                int idx;
+                cout << "Selectati client: ";
+                cin >> idx;
+                cin.ignore();
+
+                if (idx >= 1 && idx <= (int)clientiPremium.size()) {
+                    clientiPremium[idx - 1]->upgradeNivel();
+                    clientiPremium[idx - 1]->afiseaza();
+                }
+
+            }
+            else if (subOpt == 2) {
+                if (curseExpres.empty()) {
+                    cout << "Nu exista curse expres!" << endl;
+                    break;
+                }
+
+                cout << "\nCurse Expres disponibile:" << endl;
+                for (size_t i = 0; i < curseExpres.size(); i++) {
+                    cout << (i + 1) << ". " << curseExpres[i]->getCodCursa()
+                        << " - Prioritate: " << curseExpres[i]->getPrioritate() << endl;
+                }
+
+                int idx;
+                cout << "Selectati cursa: ";
+                cin >> idx;
+                cin.ignore();
+
+                if (idx >= 1 && idx <= (int)curseExpres.size()) {
+                    curseExpres[idx - 1]->upgradePrioritate();
+                    curseExpres[idx - 1]->afiseaza();
+                }
+            }
+            break;
+        }
         case 0:
             cout << "\nIesire din program..." << endl;
             for (auto c : clienti) delete c;
@@ -4316,7 +5100,17 @@ int main() {
             clienti.clear();
             curse.clear();
             facturi.clear();
+
+            for (auto cmd : comenzi) delete cmd;
+            comenzi.clear();
+
+            for (auto client : clientiPremium) delete client;
+            for (auto cursa : curseExpres) delete cursa;
+            clientiPremium.clear();
+            curseExpres.clear();
+
             break;
+
 
         default:
             cout << "\nOptiune invalida!" << endl;
